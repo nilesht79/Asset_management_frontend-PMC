@@ -196,7 +196,7 @@ const AssetInventory = () => {
     dispatch(fetchCategories({ limit: 1000, include_subcategories: 'true' }))
     dispatch(fetchProductSubCategories({ limit: 1000 }))
     dispatch(fetchLocations({ limit: 1000 }))
-    dispatch(fetchUsers({ limit: 1000 }))
+    dispatch(fetchUsers())
   }, [dispatch, location.search])
 
   // Filter software products from all products
