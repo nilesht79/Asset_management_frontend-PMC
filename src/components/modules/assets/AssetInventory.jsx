@@ -1247,13 +1247,6 @@ const AssetInventory = () => {
       render: (text) => <span className="text-gray-700">{text}</span>
     },
     {
-      title: <span className="font-semibold text-gray-700">Building</span>,
-      dataIndex: 'location_building',
-      key: 'building',
-      width: 100,
-      render: (text) => text || <span className="text-gray-400">—</span>
-    },
-    {
       title: <span className="font-semibold text-gray-700">Floor</span>,
       dataIndex: 'location_floor',
       key: 'floor',
