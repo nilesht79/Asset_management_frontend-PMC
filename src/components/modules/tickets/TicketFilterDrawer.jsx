@@ -18,6 +18,8 @@ import {
 } from '@ant-design/icons';
 import ticketService from '../../../services/ticket';
 import useResponsive from '../../../hooks/useResponsive';
+import { DatePicker } from 'antd'
+const { RangePicker } = DatePicker
 
 const { Option } = Select;
 
@@ -57,10 +59,23 @@ const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters }) => {
   };
 
   const handleApply = () => {
-    const values = form.getFieldsValue();
-    onApplyFilters(values);
-    onClose();
-  };
+  const values = form.getFieldsValue();
+
+  if (values.date_range && values.date_range.length === 2) {
+    values.start_date = values.date_range[0]
+      .startOf('day')
+      .toISOString();
+
+    values.end_date = values.date_range[1]
+      .endOf('day')
+      .toISOString();
+  }
+
+  delete values.date_range;
+
+  onApplyFilters(values);
+  onClose();
+};
 
   const handleReset = () => {
     form.resetFields();
@@ -71,7 +86,9 @@ const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters }) => {
       department_id: '',
       location_id: '',
       assigned_to_engineer_id: '',
-      is_guest: undefined
+      is_guest: undefined,
+      start_date: '',
+      end_date: ''
     });
     onClose();
   };
@@ -147,6 +164,17 @@ const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters }) => {
               ))}
             </Select>
           </Form.Item>
+          
+          {/* ✅ ADD THIS */}
+            <Form.Item
+              name="date_range"
+              label="Date Range"
+            >
+              <RangePicker
+                style={{ width: '100%' }}
+                format="DD-MM-YYYY"
+              />
+            </Form.Item>
 
           {/* Priority Filter */}
           <Form.Item
