@@ -64,7 +64,8 @@ const TicketDashboard = () => {
     closed_tickets: 0,
     critical_tickets: 0,
     overdue_tickets: 0,
-    closed_today: 0
+    closed_today: 0,
+    today_tickets: 0
   });
   const [closeRequestCount, setCloseRequestCount] = useState(0);
   const [pendingCloseRequests, setPendingCloseRequests] = useState([]);
@@ -649,48 +650,38 @@ const TicketDashboard = () => {
 
       {/* Stats Cards - Responsive */}
       <Row gutter={[16, 16]}>
-        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-          <Card>
-            <Statistic
-              title="Total Tickets"
-              value={stats.total_tickets}
-              prefix={<IssuesCloseOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-          <Card>
-            <Statistic
-              title="Open Tickets"
-              value={stats.open_tickets}
-              valueStyle={{ color: '#1890ff' }}
-              prefix={<AlertOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-          <Card>
-            <Statistic
-              title="In Progress"
-              value={stats.in_progress_tickets}
-              valueStyle={{ color: '#722ed1' }}
-              prefix={<ClockCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} md={12} lg={6} xl={6}>
-          <Card>
-            <Badge count={stats.overdue_tickets} offset={[10, 0]}>
-              <Statistic
-                title="Closed Today"
-                value={stats.closed_today}
-                valueStyle={{ color: '#52c41a' }}
-                prefix={<CheckCircleOutlined />}
-              />
-            </Badge>
-          </Card>
-        </Col>
-      </Row>
+          <Col flex="1">
+            <Card>
+              <Statistic title="Total Tickets" value={stats.total_tickets} prefix={<IssuesCloseOutlined />} />
+            </Card>
+          </Col>
+        
+          <Col flex="1">
+            <Card>
+              <Statistic title="Open Tickets" value={stats.open_tickets} valueStyle={{ color: '#1890ff' }} prefix={<AlertOutlined />} />
+            </Card>
+          </Col>
+        
+          <Col flex="1">
+            <Card>
+              <Statistic title="Today's Tickets" value={stats.today_tickets} valueStyle={{ color: '#fa8c16' }} prefix={<ClockCircleOutlined />} />
+            </Card>
+          </Col>
+        
+          <Col flex="1">
+            <Card>
+              <Statistic title="In Progress" value={stats.in_progress_tickets} valueStyle={{ color: '#722ed1' }} prefix={<ClockCircleOutlined />} />
+            </Card>
+          </Col>
+        
+          <Col flex="1">
+            <Card>
+              <Badge count={stats.overdue_tickets} offset={[10, 0]}>
+                <Statistic title="Closed Today" value={stats.closed_today} valueStyle={{ color: '#52c41a' }} prefix={<CheckCircleOutlined />} />
+              </Badge>
+            </Card>
+          </Col>
+        </Row>
 
       {/* Filters and Actions */}
       <Card>
