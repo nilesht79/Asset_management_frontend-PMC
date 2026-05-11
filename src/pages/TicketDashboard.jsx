@@ -971,6 +971,7 @@ const TicketDashboard = () => {
         onClose={() => setFilterDrawerVisible(false)}
         filters={filters}
         onApplyFilters={handleApplyFilters}
+        form={filterForm}
       />
 
       {/* Mobile Floating Action Button */}
