@@ -2280,7 +2280,7 @@ const AssetInventory = () => {
                     <Form.Item
                       name="assigned_to"
                       label="Assigned To (Optional)"
-                      extra={isComponent ? "Components cannot be assigned to users" : "Asset will inherit location from assigned user"}
+                      extra={isComponent ? "Components cannot be assigned to users" : ""}
                     >
                       <Select
                       placeholder={isComponent ? "N/A - Components cannot be assigned" : "Select user (asset will inherit location from user)"}
