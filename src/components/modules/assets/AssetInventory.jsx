@@ -2816,12 +2816,7 @@ const AssetInventory = () => {
             {
               title: 'Location',
               dataIndex: 'location_name',
-              key: 'location_name',
-              render: (text, record) => (
-                <span>
-                  {record.location_name || '-'}
-                </span>
-              )
+              key: 'location_name'
             },
             {
               title: 'Deleted At',
