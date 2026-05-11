@@ -3,6 +3,7 @@ import {
   Card,
   Table,
   Button,
+  Form,
   Input,
   Space,
   Tag,
@@ -48,11 +49,15 @@ import PendingCloseRequestsDrawer from '../components/modules/tickets/PendingClo
 import PendingServiceTypeRequestsDrawer from '../components/modules/tickets/PendingServiceTypeRequestsDrawer';
 import ReopenTicketModal from '../components/modules/tickets/ReopenTicketModal';
 import useResponsive from '../hooks/useResponsive';
+// for date formatting in filter tags
+import dayjs from 'dayjs';
 
 const { Search } = Input;
 const { confirm } = Modal;
 
 const TicketDashboard = () => {
+  //  Clear filter function 
+  const [filterForm] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [tickets, setTickets] = useState([]);
   const [stats, setStats] = useState({
@@ -300,24 +305,57 @@ const TicketDashboard = () => {
     }));
   };
 
-  const handleClearFilters = () => {
-    const clearedFilters = {
-      search: '',
-      status: '',
-      priority: '',
-      category: '',
-      department_id: '',
-      location_id: '',
-      assigned_to_engineer_id: '',
-      is_guest: undefined
-    };
-    setFilters(clearedFilters);
-    setPagination((prev) => ({
-      ...prev,
-      current: 1
-    }));
-  };
+  // Clear all filters and reset form fields OLD CODE
+  // const handleClearFilters = () => {
+  //   const clearedFilters = {
+  //     search: '',
+  //     status: '',
+  //     priority: '',
+  //     category: '',
+  //     department_id: '',
+  //     location_id: '',
+  //     assigned_to_engineer_id: '',
+  //     is_guest: undefined,
+  //     // clear date range fields
+  //     start_date: '',
+  //     end_date: '',
+  //   };
+  //   setFilters(clearedFilters);
+  //   setPagination((prev) => ({
+  //     ...prev,
+  //     current: 1
+  //   }));
+  // };
 
+    const handleClearFilters = () => {
+        const clearedFilters = {
+          search: '',
+          status: '',
+          priority: '',
+          category: '',
+          department_id: '',
+          location_id: '',
+          assigned_to_engineer_id: '',
+          is_guest: undefined,
+          start_date: '',
+          end_date: '',
+        };
+
+        // Clear filter state
+        setFilters(clearedFilters);
+
+        // Reset pagination
+        setPagination((prev) => ({
+          ...prev,
+          current: 1
+        }));
+
+        // Clear drawer form fields
+        filterForm.resetFields();
+
+        // Fetch all tickets again
+        fetchTickets();
+      };
   const handleRemoveFilter = (filterKey) => {
     setFilters((prev) => ({
       ...prev,
@@ -333,25 +371,54 @@ const TicketDashboard = () => {
     }).length;
   };
 
-  const getActiveFilterTags = () => {
-    const tags = [];
-    Object.entries(filters).forEach(([key, value]) => {
-      if (!value || (key === 'is_guest' && value === undefined)) return;
-      if (key === 'search') return; // Don't show search as tag
+  // Generate tags for active filters
+  // const getActiveFilterTags = () => {
+  //   const tags = [];
+  //   Object.entries(filters).forEach(([key, value]) => {
+  //     if (!value || (key === 'is_guest' && value === undefined)) return;
+  //     if (key === 'search') return; // Don't show search as tag
 
-      let label = key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
-      let displayValue = value;
+  //     let label = key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
+  //     let displayValue = value;
 
-      // Customize labels
-      if (key === 'is_guest') {
-        label = 'Type';
-        displayValue = value === '1' ? 'Guest' : 'Employee';
-      }
+  //     // Customize labels
+  //     if (key === 'is_guest') {
+  //       label = 'Type';
+  //       displayValue = value === '1' ? 'Guest' : 'Employee';
+  //     }
 
-      tags.push({ key, label, value: displayValue });
-    });
-    return tags;
-  };
+  //     tags.push({ key, label, value: displayValue });
+  //   });
+  //   return tags;
+  // };
+
+    // Enhanced version with date formatting 
+      const getActiveFilterTags = () => {
+        const tags = [];
+
+        Object.entries(filters).forEach(([key, value]) => {
+          if (!value || (key === 'is_guest' && value === undefined)) return;
+          if (key === 'search') return;
+
+          let label = key.replace(/_/g, ' ').replace(/^\w/, c => c.toUpperCase());
+          let displayValue = value;
+
+          // Date formatting
+          if (key === 'start_date' || key === 'end_date') {
+            displayValue = dayjs(value).format('DD-MM-YYYY');
+          }
+
+          // Guest / Employee label
+          if (key === 'is_guest') {
+            label = 'Type';
+            displayValue = value === '1' ? 'Guest' : 'Employee';
+          }
+
+          tags.push({ key, label, value: displayValue });
+        });
+
+        return tags;
+      };
 
   const handleCreateTicket = () => {
     setCreateModalVisible(true);
