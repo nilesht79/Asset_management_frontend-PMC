@@ -2808,6 +2808,11 @@ const AssetInventory = () => {
               key: 'category'
             },
             {
+              title: 'Serial Number',
+              dataIndex: 'serial_number',
+              key: 'serial_number'
+            },
+            {
               title: 'Location',
               dataIndex: 'location_name',
               key: 'location'
