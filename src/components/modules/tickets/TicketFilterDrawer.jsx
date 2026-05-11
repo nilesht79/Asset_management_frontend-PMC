@@ -24,7 +24,6 @@ const { RangePicker } = DatePicker
 const { Option } = Select;
 
 const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters, form }) => {
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     statuses: [],
