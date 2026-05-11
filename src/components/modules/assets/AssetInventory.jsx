@@ -2190,7 +2190,6 @@ const AssetInventory = () => {
                 </Select>
               </Form.Item>
             </Col>
-          </Row>
 
                       <Col span={12}>
           <Form.Item
@@ -2265,6 +2264,7 @@ const AssetInventory = () => {
             </Select>
           </Form.Item>
         </Col>
+         </Row>
 
 
           <Row gutter={16}>
@@ -2319,6 +2319,7 @@ const AssetInventory = () => {
                 }}
               </Form.Item>
             </Col>
+            
             <Col span={12}>
               <Form.Item
                 label="Department"
@@ -3558,7 +3559,8 @@ const AssetInventory = () => {
                 return searchText.includes(input.toLowerCase())
               }}
               style={{ width: '100%' }}
-              options={locations.data?.map(location => ({
+              // options={locations.data?.map(location => ({
+                options={locations.map(location => ({
                 value: location.id,
                 label: `${location.name}${location.building ? ` - ${location.building}` : ''}${location.floor ? ` (Floor: ${location.floor})` : ''}`
               }))}
