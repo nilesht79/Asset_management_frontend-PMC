@@ -86,6 +86,10 @@ const GatePasses = () => {
   const [assetSearchResults, setAssetSearchResults] = useState([]);
   const [assetSearchLoading, setAssetSearchLoading] = useState(false);
   const [selectedAssets, setSelectedAssets] = useState([]);
+  // State to track selected asset in search dropdown (to handle "Others" selection)
+  const [selectedAsset, setSelectedAsset] = useState(null);
+  // State to track if "Others" option is selected in asset search
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
 
   // Fetch dropdown data
   useEffect(() => {
@@ -93,7 +97,7 @@ const GatePasses = () => {
       try {
         const [vendorsRes, usersRes] = await Promise.all([
           masterService.getVendors().catch(() => ({ data: { data: [] } })),
-          userService.getUsers({ limit: 1000 }).catch(() => ({ data: { data: [] } }))
+          userService.getUsers({ limit: 5000 }).catch(() => ({ data: { data: [] } }))
         ]);
 
         const vendorData = vendorsRes.data?.data?.vendors || vendorsRes.data?.data || [];
@@ -304,10 +308,17 @@ const GatePasses = () => {
     try {
       const values = await createForm.validateFields();
 
-      if (selectedAssets.length === 0) {
-        message.error('Please add at least one asset');
-        return;
-      }
+      // old code: For all types, asset is mandatory. But now, for some types, we allow proceed without asset, so we check if "Others" is selected in asset search. If "Others" is selected, then asset is not mandatory
+      // if (selectedAssets.length === 0) {
+      //   message.error('Please add at least one asset');
+      //   return;
+      // }
+
+      // for other option, asset is not mandatory
+      if (selectedAssets.length === 0 && !isOtherSelected) {
+          message.error('Please add at least one asset');
+          return;
+        }
 
       setCreateLoading(true);
 
@@ -836,8 +847,8 @@ const GatePasses = () => {
 
           <Divider orientation="left">Assets</Divider>
 
-          {/* Asset Search */}
-          <Form.Item label="Search and Add Assets">
+           {/* OLD CODE: Asset Search */}
+          {/* <Form.Item label="Search and Add Assets">
             <Select
               showSearch
               placeholder="Search by asset tag, serial number, or product name..."
@@ -870,7 +881,85 @@ const GatePasses = () => {
                 </Option>
               ))}
             </Select>
-          </Form.Item>
+          </Form.Item> */}
+
+          {/* Asset Search */}
+              <Form.Item label="Search and Add Assets">
+                <Select
+                showSearch
+                placeholder="Search by asset tag, serial number, or product name..."
+                value={selectedAsset}
+                searchValue={assetSearchText}
+                onSearch={handleAssetSearch}
+                filterOption={false}
+                loading={assetSearchLoading}
+                style={{ width: '100%' }}
+                notFoundContent={
+                  assetSearchLoading
+                    ? 'Searching...'
+                    : assetSearchText.length < 2
+                    ? 'Type at least 2 characters'
+                    : 'No assets found'
+                }
+                onSelect={(value) => {
+
+                  // Proceed without asset
+                  if (value === 'other') {
+                    setSelectedAsset('other');
+                    setIsOtherSelected(true);
+
+                    console.log('Proceed without asset');
+
+                    return;
+                  }
+
+                  // Normal asset selection
+                  setSelectedAsset(value);
+
+                  const asset = assetSearchResults.find(
+                    (a) => a.id === value
+                  );
+
+                  if (asset) {
+                    handleAddAsset(asset);
+                  }
+                }}
+              >
+                {/* Other Option */}
+                <Option value="other">
+                  Others
+                </Option>
+
+                {/* Asset List */}
+                {assetSearchResults.map((asset) => (
+                  <Option key={asset.id} value={asset.id}>
+                    <Space>
+                      <DesktopOutlined />
+
+                      <Text strong>
+                        {asset.asset_tag}
+                      </Text>
+
+                      <Text type="secondary">|</Text>
+
+                      <Text>
+                        {asset.product_name}
+                      </Text>
+                    </Space>
+
+                    <div
+                      style={{
+                        fontSize: 11,
+                        color: '#8c8c8c',
+                      }}
+                    >
+                      Serial: {asset.serial_number || '-'} |
+                      Location: {asset.location_name || '-'}
+                    </div>
+                  </Option>
+                ))}
+              </Select>
+              </Form.Item>
 
           {/* Selected Assets */}
           {selectedAssets.length > 0 ? (
