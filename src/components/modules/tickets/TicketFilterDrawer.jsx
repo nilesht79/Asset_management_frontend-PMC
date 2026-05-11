@@ -23,7 +23,7 @@ const { RangePicker } = DatePicker
 
 const { Option } = Select;
 
-const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters }) => {
+const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters, form }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
@@ -62,13 +62,21 @@ const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters }) => {
   const values = form.getFieldsValue();
 
   if (values.date_range && values.date_range.length === 2) {
-    values.start_date = values.date_range[0]
-      .startOf('day')
-      .toISOString();
+    // Convert date range to start_date and end_date in ISO format
+    // values.start_date = values.date_range[0]
+    //   .startOf('day')
+    //   .toISOString();
 
-    values.end_date = values.date_range[1]
-      .endOf('day')
-      .toISOString();
+    // values.end_date = values.date_range[1]
+    //   .endOf('day')
+    //   .toISOString();
+
+    // for API, we need it in YYYY-MM-DD format
+    values.start_date = values.date_range[0]
+  .format('YYYY-MM-DD');
+
+  values.end_date = values.date_range[1]
+    .format('YYYY-MM-DD');
   }
 
   delete values.date_range;
@@ -87,6 +95,8 @@ const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters }) => {
       location_id: '',
       assigned_to_engineer_id: '',
       is_guest: undefined,
+      // clear date range fields
+      date_range: null,
       start_date: '',
       end_date: ''
     });
