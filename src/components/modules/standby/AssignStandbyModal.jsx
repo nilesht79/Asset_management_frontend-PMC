@@ -50,6 +50,7 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
   useEffect(() => {
     if (visible) {
       dispatch(fetchUsers({ limit: 5000, status: 'active' }));
+      // dispatch(fetchUsers({}));
     }
   }, [visible, dispatch]);
 
@@ -103,23 +104,30 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
   };
 
   // Memoize user options to prevent unnecessary re-renders
+  // const userOptions = useMemo(() => {
+  //   return users.map((user) => ({
+  //     value: user.id,
+  //     label: `${user.firstName} ${user.lastName} (${user.email})`
+  //   }));
+  // }, [users]);
   const userOptions = useMemo(() => {
-    return users.map((user) => ({
-      value: user.id,
-      label: `${user.firstName} ${user.lastName} (${user.employeeId})'
-    }));
-  }, [users]);
-
-  const assetOptions = useMemo(() => {
-  return userAssets.map((asset) => ({
-    value: asset.id,
-    label: `${asset.asset_tag || ''} ${asset.product_name || ''} (${asset.serial_number || ''})`
+  return users.map((user) => ({
+    value: user.id,
+    label: `${user.firstName} ${user.lastName} (${user.employeeId})`
   }));
-}, [userAssets]);
+}, [users]);
+
+  // Memoize asset options to prevent unnecessary re-renders
+  const assetOptions = useMemo(() => {
+    return userAssets.map((asset) => ({
+      value: asset.id,
+      label: `${asset.asset_tag} - ${asset.product_name} (SN: ${asset.serial_number})`
+    }));
+  }, [userAssets]);
 
   return (
     <Modal
-      title="Assign Standby Asset"
+      title="Assign Standby Asset1"
       open={visible}
       onCancel={onClose}
       onOk={handleSubmit}
