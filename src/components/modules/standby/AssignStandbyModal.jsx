@@ -114,7 +114,7 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
   const assetOptions = useMemo(() => {
     return userAssets.map((asset) => ({
       value: asset.id,
-      label: `${asset.asset_tag} - ${asset.product_name} (SN: ${asset.serial_number})`
+      label: `${asset.asset_tag} - ${asset.product_name} (${asset.serial_number})`,
     }));
   }, [userAssets]);
 
