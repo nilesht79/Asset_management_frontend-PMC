@@ -2176,13 +2176,13 @@ const AssetInventory = () => {
             </Col>
           </Row>
 
-          <Row gutter={16}>
+          <Row gutter={16} align="top">
             <Col span={12}>
               <Form.Item
                 name="asset_type"
                 label="Asset Type"
                 initialValue="standalone"
-                extra="Standalone: Regular assets. Component: Parts that can be installed in other assets (can be spare stock or installed)"
+                extra="Standalone: Regular assets | Component: Parts installable in assets"
               >
                 <Select placeholder="Select asset type">
                   <Option value="standalone">Standalone (Laptops, Printers, etc.)</Option>
