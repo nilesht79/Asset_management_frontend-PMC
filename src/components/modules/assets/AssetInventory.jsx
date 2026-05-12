@@ -2808,7 +2808,7 @@ const AssetInventory = () => {
               dataIndex: 'category_name',
               key: 'category'
             },
-            {
+           {
               title: 'Serial Number',
               dataIndex: 'serial_number',
               key: 'serial_number'
@@ -2816,7 +2816,12 @@ const AssetInventory = () => {
             {
               title: 'Location',
               dataIndex: 'location_name',
-              key: 'location_name'
+              key: 'location_name',
+              render: (text, record) => (
+                <span>
+                  {record.location_name || '-'}
+                </span>
+              )
             },
             {
               title: 'Deleted At',
