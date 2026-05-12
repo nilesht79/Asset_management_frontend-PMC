@@ -79,7 +79,7 @@ const GatePasses = () => {
   const [createModalVisible, setCreateModalVisible] = useState(false);
   const [createForm] = Form.useForm();
   const [createLoading, setCreateLoading] = useState(false);
-  const [createType, setCreateType] = useState('disposal_service');
+  const [createType, setCreateType] = useState('disposal_serviceuserService.getUsers({ limit: 1000 }).catch(() => ({ data: { data: [] } }))');
 
   // Asset search states
   const [assetSearchText, setAssetSearchText] = useState('');
@@ -315,7 +315,7 @@ const GatePasses = () => {
       // }
 
       // for other option, asset is not mandatory
-      if (selectedAssets.length === 0 && !isOtherSelected) {
+     if (selectedAssets.length === 0 && !isOtherSelected) {
           message.error('Please add at least one asset');
           return;
         }
@@ -883,7 +883,7 @@ const GatePasses = () => {
             </Select>
           </Form.Item> */}
 
-          {/* Asset Search */}
+           {/* Asset Search */}
               <Form.Item label="Search and Add Assets">
                 <Select
                 showSearch
