@@ -61,14 +61,6 @@ const TicketFilterDrawer = ({ visible, onClose, filters, onApplyFilters, form })
   const values = form.getFieldsValue();
 
   if (values.date_range && values.date_range.length === 2) {
-    // Convert date range to start_date and end_date in ISO format
-    // values.start_date = values.date_range[0]
-    //   .startOf('day')
-    //   .toISOString();
-
-    // values.end_date = values.date_range[1]
-    //   .endOf('day')
-    //   .toISOString();
 
     // for API, we need it in YYYY-MM-DD format
     values.start_date = values.date_range[0]
