@@ -110,14 +110,6 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
     }));
   }, [users]);
 
-  // Memoize asset options to prevent unnecessary re-renders
-  // const assetOptions = useMemo(() => {
-  //   return userAssets.map((asset) => ({
-  //     value: asset.id,
-  //     label: `${asset.asset_tag || ''} ${asset.product_name || ''} (${asset.serial_number || ''})`
-  //   }));
-  // }, [userAssets]);
-
   const assetOptions = useMemo(() => {
   return userAssets.map((asset) => ({
     value: asset.id,
