@@ -468,25 +468,7 @@ setAssetDepartment(
       background: '#fafafa'
     }}
   >
-    <Row gutter={16}>
-
-      <Col span={12}>
-        <strong>Location:</strong>
-
-        <div>
-          {assetLocation || 'N/A'}
-        </div>
-      </Col>
-
-      <Col span={12}>
-        <strong>Department:</strong>
-
-        <div>
-          {assetDepartment || 'N/A'}
-        </div>
-      </Col>
-
-    </Row>
+   
   </Card>
 )}
 
