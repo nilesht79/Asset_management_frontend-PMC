@@ -20,6 +20,10 @@ const CreateTicketModal = ({ visible, onClose, onSuccess, currentUser, preSelect
   const [selectedAssets, setSelectedAssets] = useState([]);
   const [selectedSoftware, setSelectedSoftware] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
+  const [assetLocation, setAssetLocation] = useState('');
+  const [assetDepartment, setAssetDepartment] = useState('');
+
+
 
   // Watch service_type to show alert for repair/replace
   const serviceType = Form.useWatch('service_type', form);
@@ -423,10 +427,70 @@ const CreateTicketModal = ({ visible, onClose, onSuccess, currentUser, preSelect
             <AssetSelector
               userId={selectedEmployee}
               selectedAssets={selectedAssets}
-              onSelectionChange={setSelectedAssets}
+              // onSelectionChange={setSelectedAssets}
+             onSelectionChange={(assetIds, assetDetails) => {
+
+  setSelectedAssets(assetIds);
+
+  // Get first selected asset
+  const asset = assetDetails?.[0];
+
+  if (asset) {
+
+setAssetLocation(
+  asset.location_name ||
+  asset.location_id ||
+  ''
+);
+
+setAssetDepartment(
+  asset.department_name ||
+  asset.department_id ||
+  ''
+);
+
+
+  } else {
+
+    setAssetLocation('');
+    setAssetDepartment('');
+  }
+}}
               disabled={loading}
               isSelfService={isEmployeeSelfService}
             />
+            
+{selectedAssets.length > 0 && (
+  <Card
+    size="small"
+    style={{
+      marginTop: 12,
+      background: '#fafafa'
+    }}
+  >
+    <Row gutter={16}>
+
+      <Col span={12}>
+        <strong>Location:</strong>
+
+        <div>
+          {assetLocation || 'N/A'}
+        </div>
+      </Col>
+
+      <Col span={12}>
+        <strong>Department:</strong>
+
+        <div>
+          {assetDepartment || 'N/A'}
+        </div>
+      </Col>
+
+    </Row>
+  </Card>
+)}
+
+
             <div style={{ marginTop: 8, marginBottom: 16 }}>
               <span style={{ color: '#8c8c8c', fontSize: '12px' }}>
                 {isEmployeeSelfService
