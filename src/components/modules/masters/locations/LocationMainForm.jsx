@@ -298,9 +298,7 @@ const LocationMainForm = ({ open, mode, location, onClose, onSuccess }) => {
             <Col span={6}>
               <Form.Item
                 label="PinCode"
-                name="pincode"
-                ]}
-              >
+                name="pincode">
                 <Input
                   placeholder="Enter 6-digit pincode"
                   maxLength={6}
