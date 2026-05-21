@@ -637,6 +637,11 @@ const TicketDashboard = () => {
       ]
     },
     {
+    title: 'Asset Subcategory',
+    dataIndex: 'asset_subcategory',
+    key: 'asset_subcategory',
+  },
+    {
       title: 'Created For',
       key: 'created_by_user',
       width: 220,
