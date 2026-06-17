@@ -120,8 +120,13 @@ const AssetSelector = ({
           <Text strong={!isComponent}>
             {asset.asset_tag}
           </Text>
-          <Text type="secondary" style={{ fontSize: '12px' }}>
+          {/* <Text type="secondary" style={{ fontSize: '12px' }}>
             {asset.product_name} {asset.product_model && `(${asset.product_model})`}
+          </Text> */}
+          <Text type="secondary" style={{ fontSize: '12px' }}>
+            {asset.product_name}
+            {asset.product_model && ` (${asset.product_model})`}
+            {asset.serial_number && ` | SN: ${asset.serial_number}`}
           </Text>
           {isComponent && asset.parent_asset_tag && (
             <Text type="secondary" style={{ fontSize: '11px' }}>
