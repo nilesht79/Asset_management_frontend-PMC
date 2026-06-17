@@ -313,26 +313,58 @@ const Users = () => {
     setUserDetailsVisible(true)
   }
 
-  const handleSaveUser = async (values) => {
-    try {
-      console.log('Form values:', values)
-      if (editingUser) {
-        await userService.updateUser(editingUser.id, values)
-        message.success('User updated successfully')
-      } else {
-        await userService.createUser(values)
-        message.success('User created successfully')
-      }
+  // const handleSaveUser = async (values) => {
+  //   try {
+  //     console.log('Form values:', values)
+  //     if (editingUser) {
+  //       await userService.updateUser(editingUser.id, values)
+  //       message.success('User updated successfully')
+  //     } else {
+  //       await userService.createUser(values)
+  //       message.success('User created successfully')
+  //     }
 
-      setUserModalVisible(false)
-      fetchUsers()
-      fetchStatistics()
-    } catch (error) {
-      console.error('Failed to save user:', error)
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to save user'
-      message.error(errorMessage)
+  //     setUserModalVisible(false)
+  //     fetchUsers()
+  //     fetchStatistics()
+  //   } catch (error) {
+  //     console.error('Failed to save user:', error)
+  //     const errorMessage = error.response?.data?.message || error.message || 'Failed to save user'
+  //     message.error(errorMessage)
+  //   }
+  // }
+
+  const handleSaveUser = async (values) => {
+  try {
+    console.log('SAVE VALUES:', values)
+    console.log(
+      'allow_multi_assets =',
+      values.allow_multi_assets,
+      typeof values.allow_multi_assets
+    )
+    console.log(
+      'is_vip =',
+      values.is_vip,
+      typeof values.is_vip
+    )
+
+    if (editingUser) {
+      await userService.updateUser(editingUser.id, values)
+      message.success('User updated successfully')
+    } else {
+      await userService.createUser(values)
+      message.success('User created successfully')
     }
+
+    setUserModalVisible(false)
+    fetchUsers()
+    fetchStatistics()
+  } catch (error) {
+    console.error('Failed to save user:', error)
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to save user'
+    message.error(errorMessage)
   }
+}
 
   const handleDeleteUser = (user) => {
     confirm({
