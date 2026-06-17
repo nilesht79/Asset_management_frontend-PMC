@@ -356,6 +356,25 @@ const CreateTicketModal = ({ visible, onClose, onSuccess, currentUser, preSelect
           </Card>
         )}
 
+        
+        {/* Issue Category - Moved before asset/software selection */}
+        <Form.Item
+          name="category"
+          label="Issue Category"
+          rules={[{ required: true, message: 'Please select an issue category' }]}
+        >
+          <Select
+            placeholder="Select category to show related items"
+            onChange={handleCategoryChange}
+          >
+            <Option value="Hardware">Hardware Issue</Option>
+            <Option value="Software">Software Issue</Option>
+            <Option value="Network">Network/Connectivity</Option>
+            <Option value="Access">Access/Permission</Option>
+            <Option value="Other">Other</Option>
+          </Select>
+        </Form.Item>
+
         {/* Ticket Title */}
         <Form.Item
           name="title"
@@ -387,23 +406,6 @@ const CreateTicketModal = ({ visible, onClose, onSuccess, currentUser, preSelect
           />
         </Form.Item>
 
-        {/* Issue Category - Moved before asset/software selection */}
-        <Form.Item
-          name="category"
-          label="Issue Category"
-          rules={[{ required: true, message: 'Please select an issue category' }]}
-        >
-          <Select
-            placeholder="Select category to show related items"
-            onChange={handleCategoryChange}
-          >
-            <Option value="Hardware">Hardware Issue</Option>
-            <Option value="Software">Software Issue</Option>
-            <Option value="Network">Network/Connectivity</Option>
-            <Option value="Access">Access/Permission</Option>
-            <Option value="Other">Other</Option>
-          </Select>
-        </Form.Item>
 
         {/* Asset/Software Selection - Only for employee tickets (not guests) and based on category */}
         {selectedEmployee && !isGuestMode && selectedCategory === 'Hardware' && (
