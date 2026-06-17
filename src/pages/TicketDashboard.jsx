@@ -640,6 +640,7 @@ const TicketDashboard = () => {
     title: 'Asset Subcategory',
     dataIndex: 'asset_subcategory',
     key: 'asset_subcategory',
+    width: 180,
   },
     {
       title: 'Created For',
