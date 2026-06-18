@@ -313,26 +313,57 @@ const Users = () => {
     setUserDetailsVisible(true)
   }
 
-  const handleSaveUser = async (values) => {
-    try {
-      console.log('Form values:', values)
-      if (editingUser) {
-        await userService.updateUser(editingUser.id, values)
-        message.success('User updated successfully')
-      } else {
-        await userService.createUser(values)
-        message.success('User created successfully')
-      }
+  // const handleSaveUser = async (values) => {
+  //   try {
+  //     console.log('Form values:', values)
+      
+  //     if (editingUser) {
+  //       await userService.updateUser(editingUser.id, values)
+  //       message.success('User updated successfully')
+  //     } else {
+  //       await userService.createUser(values)
+  //       message.success('User created successfully')
+  //     }
 
-      setUserModalVisible(false)
-      fetchUsers()
-      fetchStatistics()
-    } catch (error) {
-      console.error('Failed to save user:', error)
-      const errorMessage = error.response?.data?.message || error.message || 'Failed to save user'
-      message.error(errorMessage)
+  //     setUserModalVisible(false)
+  //     fetchUsers()
+  //     fetchStatistics()
+  //   } catch (error) {
+  //     console.error('Failed to save user:', error)
+  //     const errorMessage = error.response?.data?.message || error.message || 'Failed to save user'
+  //     message.error(errorMessage)
+  //   }
+  // }
+
+
+  const handleSaveUser = async (values) => {
+  try {
+    console.log('Form values:', values)
+
+    const payload = { ...values }
+
+    // Remove null/empty email before sending
+    if (!payload.email || payload.email.trim() === '') {
+      delete payload.email
     }
+
+    if (editingUser) {
+      await userService.updateUser(editingUser.id, payload)
+      message.success('User updated successfully')
+    } else {
+      await userService.createUser(payload)
+      message.success('User created successfully')
+    }
+
+    setUserModalVisible(false)
+    fetchUsers()
+    fetchStatistics()
+  } catch (error) {
+    console.error('Failed to save user:', error)
+    const errorMessage = error.response?.data?.message || error.message || 'Failed to save user'
+    message.error(errorMessage)
   }
+}
 
   
   const handleDeleteUser = (user) => {
