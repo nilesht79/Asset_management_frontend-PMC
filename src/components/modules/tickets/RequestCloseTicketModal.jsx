@@ -78,22 +78,22 @@ const RequestCloseTicketModal = ({ visible, ticket, onClose, onSuccess }) => {
     if (!ticket?.ticket_id) return;
     setLoadingAssets(true);
     try {
-      const response = await ticketService.getTicketAssets(ticket.ticket_id);
-console.log('TICKET ASSETS RESPONSE:', response.data);
+  console.log('FETCH LINKED ASSETS START');
 
-const assets = response.data?.data?.assets || [];
-console.log('Linked Assets:', assets);
+  const response = await ticketService.getTicketAssets(ticket.ticket_id);
 
-setLinkedAssets(assets);
+  console.log('TICKET ASSETS RESPONSE:', response);
+  console.log('TICKET ASSETS RESPONSE DATA:', response.data);
 
-console.log('Ticket Assets:', assets);
-      // Pre-select first asset
-      if (assets.length > 0) {
-        form.setFieldsValue({ asset_id: assets[0].asset_id });
-      }
-    } catch (error) {
-      console.error('Failed to fetch linked assets:', error);
-    } finally {
+  const assets = response.data?.data?.assets || [];
+
+  console.log('ASSETS ARRAY:', assets);
+
+  setLinkedAssets(assets);
+} catch (err) {
+  console.error('FETCH LINKED ASSETS ERROR:', err);
+    }
+    finally {
       setLoadingAssets(false);
     }
   };
