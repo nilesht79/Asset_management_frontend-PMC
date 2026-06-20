@@ -80,6 +80,7 @@ const RequestCloseTicketModal = ({ visible, ticket, onClose, onSuccess }) => {
     try {
       const response = await ticketService.getTicketAssets(ticket.ticket_id);
       const assets = response.data?.data?.assets || [];
+      console.log('Linked Assets:', assets);
       setLinkedAssets(assets);
       // Pre-select first asset
       if (assets.length > 0) {
@@ -414,6 +415,14 @@ const RequestCloseTicketModal = ({ visible, ticket, onClose, onSuccess }) => {
             <Col span={8}>
               <div className="text-xs text-gray-500">Department</div>
               <div className="font-medium">{ticket.department_name || 'N/A'}</div>
+            </Col>
+            <Col span={24} style={{ marginTop: 8 }}>
+              <div className="text-xs text-gray-500">Serial Number</div>
+              <div className="font-medium">
+                {linkedAssets.length > 0
+                  ? linkedAssets.map(a => a.serial_number).filter(Boolean).join(', ')
+                  : 'N/A'}
+              </div>
             </Col>
           </Row>
         </div>
