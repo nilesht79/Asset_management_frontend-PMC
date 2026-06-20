@@ -79,6 +79,7 @@ const RequestCloseTicketModal = ({ visible, ticket, onClose, onSuccess }) => {
     setLoadingAssets(true);
     try {
       const response = await ticketService.getTicketAssets(ticket.ticket_id);
+      console.log('TICKET ASSETS RESPONSE:', response.data);
       const assets = response.data?.data?.assets || [];
       console.log('Linked Assets:', assets);
       setLinkedAssets(assets);
