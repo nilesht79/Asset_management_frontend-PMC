@@ -384,7 +384,7 @@ const RequestCloseTicketModal = ({ visible, ticket, onClose, onSuccess }) => {
         <div className="space-y-2">
           <div className="flex justify-between items-start">
             <div>
-              <span className="font-semibold">Ticket1:</span>{' '}
+              <span className="font-semibold">Ticket:</span>{' '}
               <Tag color="blue">{ticket.ticket_number}</Tag>
               {requiresServiceReport && (
                 <Tag color={isRepair ? 'orange' : 'purple'}>
