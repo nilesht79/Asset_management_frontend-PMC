@@ -57,9 +57,9 @@ const RequestCloseTicketModal = ({ visible, ticket, onClose, onSuccess }) => {
       setLinkedAssets([]);
 
       // Fetch linked assets for repair/replace tickets
-      if (requiresServiceReport) {
+      // if (requiresServiceReport) {
         fetchLinkedAssets();
-      }
+      // }
 
       // Fetch available spare parts and fault types for repair
       if (isRepair) {
