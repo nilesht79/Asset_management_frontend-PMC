@@ -340,7 +340,11 @@ const Users = () => {
   try {
     console.log('Form values:', values)
 
-    const payload = { ...values }
+   const payload = {
+  ...values,
+  is_vip: !!values.is_vip,
+  allow_multi_assets: !!values.allow_multi_assets
+}
 
     // Remove null/empty email before sending
     if (!payload.email || payload.email.trim() === '') {
