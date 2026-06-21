@@ -35,13 +35,26 @@ import FlagServiceTypeModal from './FlagServiceTypeModal';
 import ReviewServiceTypeModal from './ReviewServiceTypeModal';
 import AssetRepairHistory from '../assets/AssetRepairHistory';
 import { SlaStatusBadge } from '../sla';
+import { Upload } from 'antd';
+import { UploadOutlined } from '@ant-design/icons';
+
+
+
+
+
 
 const { TextArea } = Input;
 
 const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
+  useEffect(() => {
+    console.log("UPDATED TICKET:", ticket);
+  }, [ticket]);
+
+
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [fileList, setFileList] = useState([]);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [closeRequestHistory, setCloseRequestHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -51,9 +64,79 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
   const [flagServiceTypeVisible, setFlagServiceTypeVisible] = useState(false);
   const [reviewServiceTypeVisible, setReviewServiceTypeVisible] = useState(false);
   const [pendingServiceTypeRequest, setPendingServiceTypeRequest] = useState(null);
+  const { Dragger } = Upload;
+  const [attachments, setAttachments] = useState([]);
+  const BASE_URL = "https://itsm.mmrdaindia.com";
+  
+  const fetchAttachments = async () => {
+  try {
+    const res = await ticketService.getAttachments(ticket.ticket_id);
 
+    console.log("ATTACHMENTS API:", res.data); // 🔍 debug
+
+    const data = res.data?.data || res.data;
+
+    setAttachments(Array.isArray(data) ? data : []);
+
+  } catch (err) {
+    console.error("Failed to fetch attachments", err);
+  }
+};
   const { user: currentUser } = useSelector((state) => state.auth);
+  const userRole = currentUser?.role;
 
+  const handleUploadFile = async () => {
+  if (fileList.length === 0 || !ticket) return;
+
+  try {
+    const formData = new FormData();
+    formData.append('file', fileList[0].originFileObj);
+    // console.log("Uploading file:", fileList[0].originFileObj);
+
+    await ticketService.uploadAttachment(ticket.ticket_id, formData);
+
+    setFileList([]);
+    await fetchAttachments();
+
+    message.success('File uploaded successfully');
+  } catch (error) {
+    console.error(error);
+    message.error('Upload failed');
+  }
+};
+
+  const formatDateTime = (date) => {
+  const d = new Date(date);
+
+  const day = d.getDate();
+
+  const getSuffix = (day) => {
+    if (day > 3 && day < 21) return 'th';
+    switch (day % 10) {
+      case 1: return 'st';
+      case 2: return 'nd';
+      case 3: return 'rd';
+      default: return 'th';
+    }
+  };
+
+  const suffix = getSuffix(day);
+
+  
+
+  const month = d.toLocaleString('en-IN', { month: 'long' });
+  const year = d.getFullYear();
+
+  const time = d.toLocaleTimeString('en-IN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+
+  return `${day}${suffix} ${month} ${year}, ${time}`;
+};
+
+  console.log("initial data; ", { ticket, currentUser });
   // Check if user can edit linked assets (coordinators, admins, or assigned engineer)
   const canEditLinkedAssets = currentUser && (
     currentUser.role === 'admin' ||
@@ -88,12 +171,13 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
   };
 
   useEffect(() => {
-    if (visible && ticket) {
-      fetchComments();
-      fetchCloseRequestHistory();
-      fetchServiceTypeRequests();
-    }
-  }, [visible, ticket]);
+  if (visible && ticket) {
+    fetchComments();
+    fetchCloseRequestHistory();
+    fetchServiceTypeRequests();
+    fetchAttachments(); // ✅ ADD HERE
+  }
+}, [visible, ticket]);
 
   const fetchComments = async () => {
     if (!ticket) return;
@@ -102,7 +186,8 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
     try {
       const response = await ticketService.getComments(ticket.ticket_id);
       const data = response.data.data || response.data;
-      setComments(data.comments || []);
+      // setComments(data.comments || []);
+      setComments(Array.isArray(data) ? data : data.comments || []);
     } catch (error) {
       console.error('Failed to fetch comments:', error);
     } finally {
@@ -174,6 +259,8 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
 
   if (!ticket) return null;
 
+  console.log("this is ticket data:", ticket);
+
   return (
     <Drawer
       title="Ticket Details"
@@ -212,9 +299,14 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
                 {ticket.category && (
                   <Tag>{ticket.category}</Tag>
                 )}
-                {ticket.status !== 'closed' && ticket.status !== 'cancelled' && (
+                {/* {ticket.status !== 'closed' && ticket.status !== 'cancelled' && (
                   <SlaStatusBadge ticketId={ticket.ticket_id} compact />
-                )}
+                )} */}
+                {userRole !== 'employee' &&
+ ticket.status !== 'closed' &&
+ ticket.status !== 'cancelled' && (
+  <SlaStatusBadge ticketId={ticket.ticket_id} compact />
+)}
               </div>
             </div>
             <div className="text-right text-sm text-gray-500">
@@ -230,6 +322,7 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
         </Card>
 
         {/* SLA Status - Show for all tickets (active and closed) */}
+        {userRole !== 'employee' && (
         <Card
           title={
             <div className="flex items-center space-x-2">
@@ -247,6 +340,7 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
             inline
           />
         </Card>
+        )}
 
         {/* Ticket Information */}
         <Card title="Ticket Information" size="small">
@@ -307,6 +401,9 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
                       <div className="text-xs text-gray-500">
                         {ticket.created_by_user_email || ''}
                       </div>
+                      <div className="text-xs text-gray-500">
+                        {ticket.created_at && formatDateTime(ticket.created_at)}
+                      </div>
                     </div>
                   </div>
                 </Descriptions.Item>
@@ -321,6 +418,26 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
                       <div className="text-xs text-gray-500">
                         {ticket.coordinator_email || (ticket.coordinator_name ? '' : ticket.created_by_user_email) || ''}
                       </div>
+                      <div className="text-xs text-gray-500">
+                        {ticket.created_at && formatDateTime(ticket.created_at)}
+                      </div>
+                    </div>
+                  </div>
+                </Descriptions.Item>
+
+                <Descriptions.Item label="Assigned By">
+                  <div className="flex items-center space-x-2">
+                    <Avatar size="small" icon={<UserOutlined />} />
+                    <div>
+                      <div className="font-medium">
+                        {ticket.assigned_by_name || "N/A"}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {ticket.assigned_by_email ? ticket.assigned_by_email : ''}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {ticket.assigned_at && formatDateTime(ticket.assigned_at)}
+                      </div>
                     </div>
                   </div>
                 </Descriptions.Item>
@@ -334,6 +451,12 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
                         <div className="text-xs text-gray-500">
                           {ticket.engineer_email}
                         </div>
+                        {/* 🔥 ADD THIS LINE */}
+                      {ticket.assigned_at && (
+                        <div className="text-xs text-gray-500">
+                          {formatDateTime(ticket.assigned_at)}
+                        </div>
+                      )}
                       </div>
                     </div>
                   ) : (
@@ -676,6 +799,7 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
                         <div className="mt-1 text-gray-700">
                           {comment.comment_text}
                         </div>
+                        
                         {comment.is_internal && (
                           <Tag size="small" color="orange" className="mt-1">
                             Internal Note
@@ -698,7 +822,7 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
           <Divider />
 
           {/* Add Comment */}
-          {ticket.status !== 'closed' && (
+          {/* {ticket.status !== 'closed' && (
             <div className="space-y-2">
               <TextArea
                 rows={3}
@@ -719,7 +843,220 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
                 </Button>
               </div>
             </div>
+          )} */}
+
+         {ticket.status !== 'closed' && (
+  <div className="space-y-3">
+
+    {/* ================= COMMENT ================= */}
+    <TextArea
+      rows={3}
+      placeholder="Add a comment..."
+      value={newComment}
+      onChange={(e) => setNewComment(e.target.value)}
+      maxLength={500}
+    />
+
+    <Button
+      type="primary"
+      icon={<SendOutlined />}
+      onClick={handleAddComment}
+      loading={submittingComment}
+      disabled={!newComment.trim()}
+    >
+      Add Comment
+    </Button>
+
+    {/* ================= UPLOAD TITLE ================= */}
+    <Card
+      style={{ marginTop: '10px' }}
+      title={
+        <div className="flex items-center space-x-2">
+          <UploadOutlined />
+          <span>Upload File</span>
+        </div>
+      }
+      size="small"
+    >
+
+      {/* ================= DRAGGER ================= */}
+      <Dragger
+        fileList={fileList}
+        beforeUpload={() => false}
+        accept=".jpg,.jpeg,.png,.pdf"
+        maxCount={1}
+        showUploadList={false}
+        onChange={({ fileList }) => {
+          if (fileList.length > 1) {
+            message.warning('Only 1 file allowed');
+          }
+          setFileList(fileList.slice(-1));
+        }}
+      >
+        {fileList.length > 0 ? (
+
+          <div className="flex items-center justify-between border p-2 rounded">
+
+            <div className="flex items-center gap-2">
+              {fileList[0].type?.includes('image') ? (
+                <img
+                  src={URL.createObjectURL(fileList[0].originFileObj)}
+                  style={{
+                    width: 60,
+                    height: 60,
+                    objectFit: 'contain',
+                    borderRadius: 6
+                  }}
+                />
+              ) : (
+                <div style={{ fontSize: 24 }}>📄</div>
+              )}
+
+              <div style={{ fontSize: 12 }}>
+                {fileList[0].name}
+              </div>
+            </div>
+
+            <Button
+              danger
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                setFileList([]);
+              }}
+            >
+              Remove
+            </Button>
+
+          </div>
+
+        ) : (
+          <>
+            <p className="ant-upload-drag-icon">
+              <UploadOutlined />
+            </p>
+            <p className="ant-upload-text">
+              Click or drag file to upload
+            </p>
+            <p className="ant-upload-hint">
+              Only JPG, PNG, PDF allowed (Max 5MB)
+            </p>
+          </>
+        )}
+      </Dragger>
+
+      {/* ================= UPLOAD BUTTON ================= */}
+      <div className="flex justify-end mt-2">
+        <Button
+          type="primary"
+          onClick={handleUploadFile}
+          disabled={fileList.length === 0}
+        >
+          Upload File
+        </Button>
+        {/* 🔥 SHOW UPLOADED FILES */}
+      </div>
+      <div className="mt-3 space-y-2">
+  {attachments && attachments.length > 0 ? (
+    attachments.map(file => (
+      <div key={file.attachment_id} className="flex items-center justify-between border p-2 rounded">
+
+        <div className="flex items-center gap-2">
+
+          {file.file_type?.includes('image') ? (
+            <img
+              src={`${BASE_URL}${file.file_path}`}
+              style={{
+                width: 60,
+                height: 60,
+                objectFit: 'cover',
+                borderRadius: 6
+              }}
+            />
+          ) : (
+            <div style={{ fontSize: 24 }}>📄</div>
           )}
+
+          <div style={{ fontSize: 12 }}>
+            {file.file_name}
+          </div>
+
+        </div>
+
+        <a
+          href={`https://itsm.mmrdaindia.com${file.file_path}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View
+        </a>
+
+      </div>
+    ))
+  ) : (
+    <div className="text-gray-400 text-sm">
+      {/* No files uploaded */}
+    </div>
+  )}
+</div>
+
+      {/* ================= UPLOADED FILES ================= */}
+      <div className="mt-3 space-y-2">
+
+        {attachments && attachments.length > 0 ? (
+          attachments
+            .filter(file => file.uploaded_by_role === 'engineer') // 🔥 remove this line if not needed
+            .map(file => (
+              <div
+                key={file.attachment_id}
+                className="flex items-center justify-between border p-2 rounded"
+              >
+
+                <div className="flex items-center gap-2">
+
+                  {/* IMAGE */}
+                  {file.file_type?.includes('image') ? (
+                    <img
+                      src={`${BASE_URL}${file.file_path}`}
+                      style={{
+                        width: 60,
+                        height: 60,
+                        objectFit: 'cover',
+                        borderRadius: 6
+                      }}
+                    />
+                  ) : (
+                    <div style={{ fontSize: 24 }}>📄</div>
+                  )}
+
+                  <div style={{ fontSize: 12 }}>
+                    {file.file_name}
+                  </div>
+
+                </div>
+
+                <a
+                  href={`https://itsm.mmrdaindia.com${file.file_path}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  View
+                </a>
+
+              </div>
+            ))
+        ) : (
+          <div className="text-gray-400 text-sm">
+            {/* No files uploaded */}
+          </div>
+        )}
+
+      </div>
+
+    </Card>
+
+  </div>
+)}
 
           {ticket.status === 'closed' && (
             <div className="text-center text-gray-500 text-sm py-2">
