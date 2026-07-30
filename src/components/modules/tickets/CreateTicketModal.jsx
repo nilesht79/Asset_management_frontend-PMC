@@ -175,7 +175,8 @@ const CreateTicketModal = ({ visible, onClose, onSuccess, currentUser, preSelect
         service_type: isEmployeeSelfService ? 'general' : (values.service_type || 'general'),
         assigned_to_engineer_id: values.assigned_to_engineer_id || null,
         // Include asset_ids for Hardware category
-        asset_ids: selectedCategory === 'Hardware' && selectedAssets.length > 0 ? selectedAssets : undefined,
+        // asset_ids: selectedCategory === 'Hardware' && selectedAssets.length > 0 ? selectedAssets : undefined,
+        asset_ids: selectedAssets.length > 0 ? selectedAssets : undefined,
         // Include software_installation_ids for Software category
         software_installation_ids: selectedCategory === 'Software' && selectedSoftware.length > 0 ? selectedSoftware : undefined
       };
@@ -410,10 +411,11 @@ const CreateTicketModal = ({ visible, onClose, onSuccess, currentUser, preSelect
 
 
         {/* Asset/Software Selection - Only for employee tickets (not guests) and based on category */}
-        {selectedEmployee && !isGuestMode && selectedCategory === 'Hardware' && (
+        /* {selectedEmployee && !isGuestMode && selectedCategory === 'Hardware' && ( */
+          {selectedEmployee && !isGuestMode && (
           <>
             <Divider style={{ margin: '16px 0' }}>
-              <LaptopOutlined /> Related Hardware Assets {isEmployeeSelfService ? '' : '(Optional)'}
+              <LaptopOutlined /> Related Assets {isEmployeeSelfService ? '' : '(Optional)'}
             </Divider>
             {/* Show pre-selected asset info */}
             {preSelectedAsset && isEmployeeSelfService && (
@@ -481,7 +483,7 @@ setAssetDepartment(
               <span style={{ color: '#8c8c8c', fontSize: '12px' }}>
                 {isEmployeeSelfService
                   ? 'Select the hardware assets related to your issue.'
-                  : 'Select hardware assets that are related to this issue. This helps engineers identify and track affected equipment.'}
+                  : 'Select assets related to this issue. This helps engineers identify the affected equipment.'}
               </span>
             </div>
           </>
