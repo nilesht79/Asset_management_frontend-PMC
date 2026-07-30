@@ -278,13 +278,28 @@ const TicketDashboard = () => {
     }, 500);
   };
 
-  const handleTableChange = (paginationInfo) => {
-    setPagination((prev) => ({
-      ...prev,
-      current: paginationInfo.current,
-      pageSize: paginationInfo.pageSize
-    }));
-  };
+  // const handleTableChange = (paginationInfo) => {
+  //   setPagination((prev) => ({
+  //     ...prev,
+  //     current: paginationInfo.current,
+  //     pageSize: paginationInfo.pageSize
+  //   }));
+  // };
+
+  // Ticket Management Status and Priority Filter
+  const handleTableChange = (paginationInfo, tableFilters, sorter) => {
+  setPagination((prev) => ({
+    ...prev,
+    current: paginationInfo.current,
+    pageSize: paginationInfo.pageSize
+  }));
+
+  setFilters((prev) => ({
+    ...prev,
+    status: tableFilters.status?.[0] || '',
+    priority: tableFilters.priority?.[0] || ''
+  }));
+};
 
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({
@@ -600,42 +615,44 @@ const TicketDashboard = () => {
       ellipsis: true
     },
     {
-      title: 'Status',
-      dataIndex: 'status',
-      key: 'status',
-      width: 120,
-      render: (status) => (
-        <Tag color={ticketService.getStatusColor(status)}>
-          {ticketService.getStatusDisplayName(status).toUpperCase()}
-        </Tag>
-      ),
-      filters: [
-        { text: 'Open', value: 'open' },
-        { text: 'Assigned', value: 'assigned' },
-        { text: 'In Progress', value: 'in_progress' },
-        { text: 'Pending Closure', value: 'pending_closure' },
-        { text: 'Resolved', value: 'resolved' },
-        { text: 'Closed', value: 'closed' }
-      ]
-    },
+  title: 'Status',
+  dataIndex: 'status',
+  key: 'status',
+  width: 120,
+  filteredValue: filters.status ? [filters.status] : null,
+  render: (status) => (
+    <Tag color={ticketService.getStatusColor(status)}>
+      {ticketService.getStatusDisplayName(status).toUpperCase()}
+    </Tag>
+  ),
+  filters: [
+    { text: 'Open', value: 'open' },
+    { text: 'Assigned', value: 'assigned' },
+    { text: 'In Progress', value: 'in_progress' },
+    { text: 'Pending Closure', value: 'pending_closure' },
+    { text: 'Resolved', value: 'resolved' },
+    { text: 'Closed', value: 'closed' }
+  ]
+},
     {
-      title: 'Priority',
-      dataIndex: 'priority',
-      key: 'priority',
-      width: 110,
-      render: (priority) => (
-        <Tag color={ticketService.getPriorityColor(priority)}>
-          {ticketService.getPriorityDisplayName(priority).toUpperCase()}
-        </Tag>
-      ),
-      filters: [
-        { text: 'Low', value: 'low' },
-        { text: 'Medium', value: 'medium' },
-        { text: 'High', value: 'high' },
-        { text: 'Critical', value: 'critical' },
-        { text: 'Emergency', value: 'emergency' }
-      ]
-    },
+  title: 'Priority',
+  dataIndex: 'priority',
+  key: 'priority',
+  width: 110,
+  filteredValue: filters.priority ? [filters.priority] : null,
+  render: (priority) => (
+    <Tag color={ticketService.getPriorityColor(priority)}>
+      {ticketService.getPriorityDisplayName(priority).toUpperCase()}
+    </Tag>
+  ),
+  filters: [
+    { text: 'Low', value: 'low' },
+    { text: 'Medium', value: 'medium' },
+    { text: 'High', value: 'high' },
+    { text: 'Critical', value: 'critical' },
+    { text: 'Emergency', value: 'emergency' }
+  ]
+},
     {
     title: 'Asset Subcategory',
     dataIndex: 'asset_subcategory',
