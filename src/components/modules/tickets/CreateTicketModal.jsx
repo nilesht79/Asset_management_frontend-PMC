@@ -411,7 +411,7 @@ const CreateTicketModal = ({ visible, onClose, onSuccess, currentUser, preSelect
 
 
         {/* Asset/Software Selection - Only for employee tickets (not guests) and based on category */}
-        /* {selectedEmployee && !isGuestMode && selectedCategory === 'Hardware' && ( */
+       {/* {selectedEmployee && !isGuestMode && selectedCategory === 'Hardware' && ( */}
           {selectedEmployee && !isGuestMode && (
           <>
             <Divider style={{ margin: '16px 0' }}>
