@@ -31,7 +31,8 @@ import {
   BarChartOutlined,
   ClockCircleOutlined,
   EnvironmentOutlined,
-  TeamOutlined
+  TeamOutlined,
+  TagsOutlined
 } from '@ant-design/icons';
 import slaService from '../services/sla';
 import masterService from '../services/master';
@@ -44,12 +45,17 @@ const { Option } = Select;
 
 const SlaComplianceReport = () => {
   const [loading, setLoading] = useState(false);
+  const [ticketPagination, setTicketPagination] = useState({
+  current: 1,
+  pageSize: 20,
+});
   const [exporting, setExporting] = useState(false);
   const [reportData, setReportData] = useState(null);
   const [filterOptions, setFilterOptions] = useState({
     locations: [],
     departments: [],
     categories: [],
+    subCategories: [],
     oems: [],
     products: []
   });
@@ -63,8 +69,10 @@ const SlaComplianceReport = () => {
   const [locationId, setLocationId] = useState(null);
   const [departmentId, setDepartmentId] = useState(null);
   const [assetCategoryId, setAssetCategoryId] = useState(null);
+  const [subCategoryId, setSubCategoryId] = useState(null);
   const [oemId, setOemId] = useState(null);
   const [productModel, setProductModel] = useState(null);
+  const [slaMet, setSlaMet] = useState(null);
 
   useEffect(() => {
     loadFilterOptions();
@@ -85,6 +93,12 @@ const SlaComplianceReport = () => {
       const categoriesRes = await masterService.getCategories();
       const categories = categoriesRes.data?.data?.categories || categoriesRes.data?.data || [];
 
+      // const subCategoriesRes = await masterService.getSubCategories();
+      const subCategoriesRes = await masterService.getProductSubCategories({
+          limit: 1000
+      });
+      const subCategories = subCategoriesRes.data?.data?.subcategories || subCategoriesRes.data?.data || [];
+
       // Load OEMs
       const oemsRes = await masterService.getOEMs();
       const oems = oemsRes.data?.data?.oems || oemsRes.data?.data || [];
@@ -97,6 +111,7 @@ const SlaComplianceReport = () => {
         locations,
         departments,
         categories,
+        subCategories,
         oems,
         products
       });
@@ -122,8 +137,10 @@ const SlaComplianceReport = () => {
       if (locationId) params.location_id = locationId;
       if (departmentId) params.department_id = departmentId;
       if (assetCategoryId) params.asset_category_id = assetCategoryId;
+      if (subCategoryId) params.sub_category_id = subCategoryId;
       if (oemId) params.oem_id = oemId;
       if (productModel) params.product_model = productModel;
+      if (slaMet !== null) params.met_sla = slaMet;
 
       const response = await slaService.getComplianceReport(params);
       setReportData(response.data?.data || null);
@@ -154,6 +171,7 @@ const SlaComplianceReport = () => {
       if (assetCategoryId) params.asset_category_id = assetCategoryId;
       if (oemId) params.oem_id = oemId;
       if (productModel) params.product_model = productModel;
+      if (slaMet !== null) params.met_sla = slaMet;
 
       await slaService.exportComplianceReport(params);
       message.success('Report exported successfully');
@@ -208,8 +226,10 @@ const SlaComplianceReport = () => {
     setLocationId(null);
     setDepartmentId(null);
     setAssetCategoryId(null);
+    setSubCategoryId(null);
     setOemId(null);
     setProductModel(null);
+    setSlaMet(null);
   };
 
   // Table columns for period breakdown
@@ -221,9 +241,9 @@ const SlaComplianceReport = () => {
       width: 120
     },
     {
-      title: 'Total Resolved',
-      dataIndex: 'total_resolved',
-      key: 'total_resolved',
+      title: 'Total Tickets',
+      dataIndex: 'total_tickets',
+      key: 'total_tickets',
       width: 120,
       align: 'center'
     },
@@ -277,9 +297,9 @@ const SlaComplianceReport = () => {
       render: (_, record) => record.location_name || record.department_name || '-'
     },
     {
-      title: 'Total Resolved',
-      dataIndex: 'total_resolved',
-      key: 'total_resolved',
+      title: 'Total Tickets',
+      dataIndex: 'total_tickets',
+      key: 'total_tickets',
       width: 120,
       align: 'center'
     },
@@ -308,6 +328,36 @@ const SlaComplianceReport = () => {
     }
   ];
 
+  const subCategoryColumns = [
+  {
+    title: 'Sub Category',
+    dataIndex: 'sub_category_name',
+    key: 'sub_category_name'
+  },
+  {
+    title: 'Total Tickets',
+    dataIndex: 'total_tickets',
+    key: 'total_tickets',
+    align: 'center'
+  },
+  {
+    title: 'Within SLA',
+    dataIndex: 'resolved_within_sla',
+    key: 'resolved_within_sla',
+    align: 'center',
+    render: (val) => <Tag color="green">{val}</Tag>
+  },
+  {
+    title: 'Compliance Rate',
+    dataIndex: 'compliance_rate',
+    key: 'compliance_rate',
+    align: 'center',
+    render: (val) => (
+      <Progress percent={val || 0} size="small" />
+    )
+  }
+];
+
   // Table columns for ticket details
   const detailColumns = [
     {
@@ -329,6 +379,12 @@ const SlaComplianceReport = () => {
       dataIndex: 'category',
       key: 'category',
       width: 100
+    },
+    {
+    title: 'Sub Category',
+    dataIndex: 'sub_category_name',
+    key: 'sub_category_name',
+    width: 180
     },
     {
       title: 'Priority',
@@ -472,12 +528,44 @@ const SlaComplianceReport = () => {
               dataSource={reportData.details}
               columns={detailColumns}
               rowKey="ticket_id"
-              pagination={{ pageSize: 20, showSizeChanger: true }}
+              pagination={{
+                  current: ticketPagination.current,
+                  pageSize: ticketPagination.pageSize,
+                  total: reportData?.details?.length || 0,
+                  showSizeChanger: true,
+                  pageSizeOptions: ['10', '20', '50', '100'],
+                  onChange: (page, pageSize) => {
+                    setTicketPagination({
+                      current: page,
+                      pageSize,
+                    });
+                  },
+                }}
               size="small"
               scroll={{ x: 1600 }}
             />
           ) : (
             <Empty description="No ticket data available" />
+          )}
+        </Card>
+      )
+    },
+    {
+      key: 'subcategory',
+      label: <span><TagsOutlined />By Sub Category</span>,
+      children: (
+        <Card title="Sub Category Breakdown">
+          {reportData?.by_sub_category &&
+          reportData.by_sub_category.length > 0 ? (
+            <Table
+              dataSource={reportData.by_sub_category}
+              columns={subCategoryColumns}
+              rowKey="sub_category_id"
+              pagination={false}
+              size="middle"
+            />
+          ) : (
+            <Empty description="No sub category data available" />
           )}
         </Card>
       )
@@ -617,6 +705,23 @@ const SlaComplianceReport = () => {
             </Select>
           </Col>
           <Col xs={24} sm={12} md={8} lg={4}>
+            <Text strong>Sub Category</Text>
+          
+            <Select
+              value={subCategoryId}
+              onChange={setSubCategoryId}
+              placeholder="All Sub Categories"
+              allowClear
+              style={{ width: '100%' }}
+            >
+              {filterOptions.subCategories.map(sub => (
+                <Option key={sub.id} value={sub.id}>
+                  {sub.name}
+                </Option>
+              ))}
+            </Select>
+          </Col>
+          <Col xs={24} sm={12} md={8} lg={4}>
             <Text strong style={{ display: 'block', marginBottom: 8 }}>OEM</Text>
             <Select
               value={oemId}
@@ -651,6 +756,22 @@ const SlaComplianceReport = () => {
             </Select>
           </Col>
           <Col xs={24} sm={12} md={8} lg={4}>
+            <Text strong style={{ display: 'block', marginBottom: 8 }}>
+                SLA Met
+            </Text>
+        
+            <Select
+                value={slaMet}
+                onChange={setSlaMet}
+                placeholder="All"
+                allowClear
+                style={{ width: '100%' }}
+            >
+                <Option value={1}>Yes</Option>
+                <Option value={0}>No</Option>
+            </Select>
+        </Col>
+          <Col xs={24} sm={12} md={8} lg={4}>
             <Space>
               <Button
                 type="primary"
@@ -683,7 +804,7 @@ const SlaComplianceReport = () => {
               <Card hoverable>
                 <Statistic
                   title="Total Tickets Resolved"
-                  value={summary.total_resolved || 0}
+                  value={summary.total_tickets || 0}
                   prefix={<ClockCircleOutlined style={{ color: '#1890ff' }} />}
                 />
               </Card>
