@@ -126,6 +126,11 @@ const SlaComplianceReport = () => {
       return;
     }
 
+     setTicketPagination({
+    current: 1,
+    pageSize: 20
+  });
+
     setLoading(true);
     try {
       const params = {
@@ -220,17 +225,45 @@ const SlaComplianceReport = () => {
     setDateRange([start, end]);
   };
 
-  const handleResetFilters = () => {
-    setDateRange([dayjs().subtract(30, 'day'), dayjs()]);
-    setFrequency(null);
-    setLocationId(null);
-    setDepartmentId(null);
-    setAssetCategoryId(null);
-    setSubCategoryId(null);
-    setOemId(null);
-    setProductModel(null);
-    setSlaMet(null);
-  };
+      const handleResetFilters = async () => {
+      const newDateRange = [
+        dayjs().subtract(30, 'day'),
+        dayjs()
+      ];
+    
+      setDateRange(newDateRange);
+      setFrequency(null);
+      setLocationId(null);
+      setDepartmentId(null);
+      setAssetCategoryId(null);
+      setSubCategoryId(null);
+      setOemId(null);
+      setProductModel(null);
+      setSlaMet(null);
+    
+      // Fetch default report after reset
+      setLoading(true);
+    
+      try {
+        const params = {
+          date_from: newDateRange[0].format('YYYY-MM-DD'),
+          date_to: newDateRange[1].format('YYYY-MM-DD')
+        };
+    
+        const response = await slaService.getComplianceReport(params);
+    
+        setReportData(response.data?.data || null);
+        setTicketPagination({
+          current: 1,
+          pageSize: 20
+        });
+      } catch (error) {
+        console.error('Failed to reset SLA report:', error);
+        message.error('Failed to reset SLA compliance report');
+      } finally {
+        setLoading(false);
+      }
+    };
 
   // Table columns for period breakdown
   const periodColumns = [
