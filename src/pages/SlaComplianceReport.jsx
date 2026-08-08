@@ -275,12 +275,12 @@ const SlaComplianceReport = () => {
       width: 120
     },
     {
-      title: 'Total Tickets',
-      dataIndex: 'total_tickets',
-      key: 'total_tickets',
-      width: 120,
-      align: 'center'
-    },
+        title: 'Total Tickets',
+        dataIndex: 'total_resolved',
+        key: 'total_resolved',
+        width: 120,
+        align: 'center'
+      },
     {
       title: 'Within SLA',
       dataIndex: 'resolved_within_sla',
@@ -331,12 +331,12 @@ const SlaComplianceReport = () => {
       render: (_, record) => record.location_name || record.department_name || '-'
     },
     {
-      title: 'Total Tickets',
-      dataIndex: 'total_tickets',
-      key: 'total_tickets',
-      width: 120,
-      align: 'center'
-    },
+        title: 'Total Tickets',
+        dataIndex: 'total_resolved',
+        key: 'total_resolved',
+        width: 120,
+        align: 'center'
+      },
     {
       title: 'Within SLA',
       dataIndex: 'resolved_within_sla',
@@ -837,8 +837,8 @@ const SlaComplianceReport = () => {
             <Col xs={24} sm={12} lg={6}>
               <Card hoverable>
                 <Statistic
-                  title="Total Tickets Resolved"
-                  value={summary.total_tickets || 0}
+                    title="Total Tickets Resolved"
+                    value={summary.total_resolved || 0}
                   prefix={<ClockCircleOutlined style={{ color: '#1890ff' }} />}
                 />
               </Card>
