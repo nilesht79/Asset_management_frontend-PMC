@@ -174,6 +174,7 @@ const SlaComplianceReport = () => {
       if (locationId) params.location_id = locationId;
       if (departmentId) params.department_id = departmentId;
       if (assetCategoryId) params.asset_category_id = assetCategoryId;
+      if (subCategoryId) params.sub_category_id = subCategoryId;
       if (oemId) params.oem_id = oemId;
       if (productModel) params.product_model = productModel;
       if (slaMet !== null) params.met_sla = slaMet;
