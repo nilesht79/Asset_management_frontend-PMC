@@ -48,6 +48,32 @@ export const fetchStandbyAssignments = createAsyncThunk(
   }
 );
 
+
+export const unassignStandbyAsset = createAsyncThunk(
+  'standbyAssignment/unassign',
+
+  async ({ assignmentId }, { rejectWithValue }) => {
+
+    try {
+
+      const response = await api.put(
+        `/standby/assignments/${assignmentId}/unassign`
+      );
+
+      return response.data;
+
+    } catch (error) {
+
+      return rejectWithValue(
+        error.response?.data?.message ||
+        'Failed to unassign standby asset'
+      );
+
+    }
+
+  }
+);
+
 /**
  * Assign standby asset to user
  */
@@ -59,6 +85,34 @@ export const assignStandbyAsset = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(error.response?.data?.message || 'Failed to assign standby asset');
+    }
+  }
+);
+
+
+
+
+/**
+ * Reassign standby asset
+ */
+export const reassignStandbyAsset = createAsyncThunk(
+  'standbyAssignment/reassign',
+  async ({ assignmentId, assignmentData }, { rejectWithValue }) => {
+    try {
+      console.log("assignmentId", assignmentId);
+console.log("assignmentData", assignmentData);
+
+const response = await api.put(
+    `/standby/assignments/${assignmentId}/reassign`,
+    assignmentData
+);
+
+console.log(response);
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Failed to reassign standby asset'
+      );
     }
   }
 );
@@ -223,6 +277,33 @@ const standbyAssignmentSlice = createSlice({
         state.operationLoading = false;
         state.operationError = action.payload;
       });
+
+
+      // Reassign Standby Asset
+builder
+  .addCase(reassignStandbyAsset.pending, (state) => {
+    state.operationLoading = true;
+    state.operationError = null;
+  })
+  .addCase(reassignStandbyAsset.fulfilled, (state, action) => {
+    state.operationLoading = false;
+
+    const updatedAssignment = action.payload.data?.assignment;
+
+    if (updatedAssignment) {
+      const index = state.assignments.findIndex(
+        (a) => a.id === updatedAssignment.id
+      );
+
+      if (index !== -1) {
+        state.assignments[index] = updatedAssignment;
+      }
+    }
+  })
+  .addCase(reassignStandbyAsset.rejected, (state, action) => {
+    state.operationLoading = false;
+    state.operationError = action.payload;
+  });
 
     // Make Assignment Permanent
     builder
