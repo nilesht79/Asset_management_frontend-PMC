@@ -374,6 +374,7 @@ const CreateTicketModal = ({ visible, onClose, onSuccess, currentUser, preSelect
             <Option value="Access">Access/Permission</Option>
             <Option value="VC Calls">VC Calls</Option>
             <Option value="Daily Tasks">Daily Tasks / Speed Test</Option>
+            <Option value="Server">Server Issue</Option>
             <Option value="Other">Other</Option>
           </Select>
         </Form.Item>
