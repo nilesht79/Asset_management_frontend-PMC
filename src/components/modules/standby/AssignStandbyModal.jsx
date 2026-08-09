@@ -20,6 +20,7 @@ import {
 } from 'antd';
 import {
   assignStandbyAsset,
+  reassignStandbyAsset,
   selectAssignmentOperationLoading,
   clearOperationError
 } from '../../../store/slices/standbyAssignmentSlice';
@@ -29,7 +30,16 @@ import dayjs from 'dayjs';
 const { TextArea } = Input;
 const { Text } = Typography;
 
-const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
+
+
+// const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
+  const AssignStandbyModal = ({
+    visible,
+    onClose,
+    standbyAsset,
+    onSuccess,
+    mode = "assign"
+}) => {
   const dispatch = useDispatch();
   const [form] = Form.useForm();
 
@@ -45,6 +55,32 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
   // Local state
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedOriginalAsset, setSelectedOriginalAsset] = useState(null);
+  const isReassign = mode === "reassign";
+
+  useEffect(() => {
+
+    if(
+        visible &&
+        isReassign &&
+        standbyAsset?.current_assignment
+    ){
+
+        form.setFieldsValue({
+    user_id: standbyAsset.current_assignment.user_id,
+    notes: standbyAsset.current_assignment.notes || ""
+});
+
+setSelectedUser({
+    id: standbyAsset.current_assignment.user_id
+});
+
+    }
+
+},[
+    visible,
+    standbyAsset,
+    isReassign
+]);
 
   // Fetch users on modal open (fetch all users, no pagination limit)
   useEffect(() => {
@@ -72,9 +108,76 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
   }, [visible, form, dispatch]);
 
   // Handle submit
-  const handleSubmit = async () => {
-    try {
-      const values = await form.validateFields();
+//   const handleSubmit = async () => {
+//     try {
+//       const values = await form.validateFields();
+
+//       const assignmentData = {
+//         user_id: values.user_id,
+//         standby_asset_id: standbyAsset.id,
+//         original_asset_id: values.original_asset_id || null,
+//         reason: values.reason,
+//         reason_category: values.reason_category,
+//         expected_return_date: values.expected_return_date
+//           ? values.expected_return_date.format('YYYY-MM-DD')
+//           : null,
+//         notes: values.notes || ''
+//       };
+
+//       await dispatch(assignStandbyAsset(assignmentData)).unwrap();
+
+//       message.success(
+//     isReassign
+//         ? 'Standby asset reassigned successfully'
+//         : 'Standby asset assigned successfully'
+// );
+//       onSuccess?.();
+//       onClose();
+//     } catch (error) {
+//       if (error.errors) {
+//         // Validation errors from backend
+//         message.error(error.errors[0]?.message || 'Validation failed');
+//       } else {
+//         message.error(error || 'Failed to assign standby asset');
+//       }
+//     }
+//   };
+const handleSubmit = async () => {
+   console.log("REASSIGN CLICKED");
+  try {
+    const values = await form.validateFields();
+
+    console.log(values);
+
+console.log(standbyAsset);
+
+console.log(standbyAsset.current_assignment);
+
+    if (mode === "reassign") {
+
+    if (!standbyAsset?.current_assignment?.id) {
+        message.error("No standby assignment found.");
+        return;
+    }
+
+    console.log(
+        standbyAsset?.current_assignment?.id
+    );
+
+    console.log(values.user_id);
+
+    await dispatch(
+        reassignStandbyAsset({
+            assignmentId: standbyAsset.current_assignment.id,
+            assignmentData: {
+                user_id: values.user_id,
+                notes: values.notes || ""
+            }
+        })
+    ).unwrap();
+
+    message.success("Standby asset reassigned successfully");
+} else {
 
       const assignmentData = {
         user_id: values.user_id,
@@ -83,25 +186,30 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
         reason: values.reason,
         reason_category: values.reason_category,
         expected_return_date: values.expected_return_date
-          ? values.expected_return_date.format('YYYY-MM-DD')
+          ? values.expected_return_date.format("YYYY-MM-DD")
           : null,
-        notes: values.notes || ''
+        notes: values.notes || ""
       };
+      console.log("Standby Asset:", standbyAsset);
+console.log("Current Assignment:", standbyAsset?.current_assignment);
 
       await dispatch(assignStandbyAsset(assignmentData)).unwrap();
 
-      message.success('Standby asset assigned successfully');
-      onSuccess?.();
-      onClose();
-    } catch (error) {
-      if (error.errors) {
-        // Validation errors from backend
-        message.error(error.errors[0]?.message || 'Validation failed');
-      } else {
-        message.error(error || 'Failed to assign standby asset');
-      }
+      message.success("Standby asset assigned successfully");
     }
-  };
+
+    await onSuccess?.();
+onClose();
+  } catch (error) {
+
+    if (error.errors) {
+      message.error(error.errors[0]?.message || "Validation failed");
+    } else {
+      message.error(error || "Operation failed");
+    }
+
+  }
+};
 
   // Memoize user options to prevent unnecessary re-renders
   // const userOptions = useMemo(() => {
@@ -127,13 +235,17 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
 
   return (
     <Modal
-      title="Assign Standby Asset1"
+      title={
+    isReassign
+        ? "Reassign Standby Asset"
+        : "Assign Standby Asset"
+}
       open={visible}
       onCancel={onClose}
       onOk={handleSubmit}
       confirmLoading={loading}
       width={800}
-      okText="Assign"
+      okText={isReassign ? "Reassign Asset" : "Assign Asset"}
       cancelText="Cancel"
     >
       {/* Standby Asset Info */}
@@ -154,6 +266,8 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
             </Col>
           </Row>
         </Card>
+        
+
       )}
 
       <Divider />
@@ -198,8 +312,9 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
         </Form.Item>
 
         {/* Original Asset (Optional) */}
-        <Form.Item
-          name="original_asset_id"
+       {!isReassign && (
+<Form.Item
+    name="original_asset_id"
           label="Original Asset (Under Repair/Maintenance)"
           tooltip="Select the user's asset that is being replaced temporarily. Leave empty if user has no asset."
         >
@@ -231,8 +346,10 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
             }
           />
         </Form.Item>
+       )}
 
         {/* Reason Category */}
+         {!isReassign && (
         <Form.Item
           name="reason_category"
           label="Reason Category"
@@ -249,8 +366,10 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
             ]}
           />
         </Form.Item>
+         )}
 
         {/* Reason */}
+        {!isReassign && (
         <Form.Item
           name="reason"
           label="Reason"
@@ -267,8 +386,10 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
             maxLength={500}
           />
         </Form.Item>
+        )}
 
         {/* Expected Return Date */}
+        {!isReassign && (
         <Form.Item
           name="expected_return_date"
           label="Expected Return Date"
@@ -280,8 +401,10 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
             disabledDate={(current) => current && current < dayjs().startOf('day')}
           />
         </Form.Item>
+        )}
 
         {/* Notes */}
+        
         <Form.Item name="notes" label="Additional Notes">
           <TextArea
             rows={2}
@@ -293,6 +416,7 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
       </Form>
 
       {/* Info Box */}
+      {!isReassign && (
       <Card size="small" style={{ backgroundColor: '#e6f7ff', borderColor: '#91d5ff' }}>
         <Text type="secondary">
           <strong>What happens next:</strong>
@@ -307,6 +431,35 @@ const AssignStandbyModal = ({ visible, onClose, standbyAsset, onSuccess }) => {
           </ul>
         </Text>
       </Card>
+      )}
+
+      {isReassign && standbyAsset?.current_assignment && (
+<Card
+    size="small"
+    style={{
+        marginBottom:16,
+        background:"#fafafa"
+    }}
+>
+    <Row gutter={16}>
+        <Col span={12}>
+            <Text strong>Currently Assigned To</Text>
+            <div>
+                {standbyAsset.current_assignment.name}
+            </div>
+        </Col>
+
+        <Col span={12}>
+            <Text strong>Assigned Since</Text>
+            <div>
+                {dayjs(
+                    standbyAsset.current_assignment.assigned_date
+                ).format("DD MMM YYYY")}
+            </div>
+        </Col>
+    </Row>
+</Card>
+)}
     </Modal>
   );
 };
