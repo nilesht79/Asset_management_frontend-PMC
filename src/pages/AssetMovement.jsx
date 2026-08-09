@@ -306,6 +306,20 @@ const AssetMovement = () => {
       )
     },
     {
+      title: 'Sub Category',
+      dataIndex: 'subcategory_name',
+      key: 'subcategory_name',
+      width: 180,
+      ellipsis: {
+        showTitle: false,
+      },
+      render: (text) => (
+        <Tooltip title={text || 'N/A'}>
+          <Text>{text || '-'}</Text>
+        </Tooltip>
+      )
+    },
+    {
       title: 'Movement Type',
       dataIndex: 'movement_type',
       key: 'movement_type',
