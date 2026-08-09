@@ -109,6 +109,19 @@ const gatePassService = {
     }
   },
 
+    /**
+ * Get assets assigned to a user
+ */
+getUserAssets: async (userId) => {
+  try {
+    const response = await apiClient.get(`/gate-passes/users/${userId}/assets`);
+    return response;
+  } catch (error) {
+    console.error('Error fetching user assets:', error);
+    throw error;
+  }
+},
+
   /**
    * Get asset with its components
    * @param {string} assetId - Asset ID
@@ -160,7 +173,8 @@ const gatePassService = {
       end_user: {
         new_assignment: 'New Assignment',
         temporary_handover: 'Temporary Handover',
-        permanent_transfer: 'Permanent Transfer'
+        permanent_transfer: 'Permanent Transfer',
+        repair_return: 'Repair and Return'
       }
     };
     return purposes[type]?.[purpose] || purpose || 'N/A';
@@ -193,11 +207,48 @@ const gatePassService = {
       end_user: [
         { value: 'new_assignment', label: 'New Assignment' },
         { value: 'temporary_handover', label: 'Temporary Handover' },
-        { value: 'permanent_transfer', label: 'Permanent Transfer' }
+        { value: 'permanent_transfer', label: 'Permanent Transfer' },
+        { value: 'repair_return', label: 'Repair and Return' }
       ]
     };
     return options[type] || [];
   },
+
+    exportExcel: async (params = {}) => {
+  try {
+    const response = await apiClient.get(
+      "/gate-passes/export",
+      {
+        params,
+        responseType: "blob"
+      }
+    );
+
+    const blob = new Blob([
+      response.data
+    ]);
+
+    const url = window.URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+
+    a.href = url;
+
+    a.download = "GatePasses.xlsx";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error(err);
+    throw err;
+  }
+},
 
   /**
    * Condition options
@@ -210,5 +261,7 @@ const gatePassService = {
     { value: 'unknown', label: 'Unknown' }
   ]
 };
+
+ 
 
 export default gatePassService;
