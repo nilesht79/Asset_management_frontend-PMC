@@ -5,6 +5,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+
 import {
   Card,
   Table,
@@ -18,7 +19,8 @@ import {
   Col,
   message,
   Tooltip,
-  Popconfirm
+  Popconfirm,
+  Modal
 } from 'antd';
 import {
   PlusOutlined,
@@ -26,7 +28,10 @@ import {
   ReloadOutlined,
   DeleteOutlined,
   UserAddOutlined,
-  EyeOutlined
+  EyeOutlined,
+  SwapOutlined,
+  DisconnectOutlined,
+  UserOutlined 
 } from '@ant-design/icons';
 import {
   fetchStandbyAssets,
@@ -52,6 +57,10 @@ import AddToStandbyPoolModal from '../components/modules/standby/AddToStandbyPoo
 import AssignStandbyModal from '../components/modules/standby/AssignStandbyModal';
 import ViewAssetDetailsModal from '../components/modules/standby/ViewAssetDetailsModal';
 import { formatDateOnly } from '../utils/dateUtils';
+import {
+    unassignStandbyAsset
+} from '../store/slices/standbyAssignmentSlice';
+
 
 const { Search } = Input;
 
@@ -75,6 +84,7 @@ const StandbyPool = () => {
   const [assignModalVisible, setAssignModalVisible] = useState(false);
   const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState(null);
+  const [modalMode, setModalMode] = useState("assign");
 
   // Fetch initial data
   useEffect(() => {
@@ -108,10 +118,87 @@ const StandbyPool = () => {
   };
 
   // Handle refresh
-  const handleRefresh = () => {
-    dispatch(fetchStandbyAssets({ ...filters, ...pagination }));
-    dispatch(fetchStandbyStatistics());
-  };
+  const handleRefresh = async () => {
+
+    await dispatch(
+        fetchStandbyAssets({
+            page: pagination.page,
+            limit: pagination.limit,
+            ...filters
+        })
+    );
+
+    await dispatch(fetchStandbyStatistics());
+
+};
+
+  const handleUnassignStandby = (asset) => {
+    Modal.confirm({
+        title: "Unassign Standby Asset",
+
+        content: (
+            <div>
+                <p>
+                    Are you sure you want to unassign this standby asset?
+                </p>
+
+                <p>
+                    Asset:
+                    <strong> {asset.asset_tag}</strong>
+                </p>
+
+                {asset.current_assignment?.name && (
+                    <p>
+                        Currently assigned to:
+                        <strong> {asset.current_assignment.name}</strong>
+                    </p>
+                )}
+
+                <p className="text-gray-500 mt-2">
+                    The standby asset will become available for a new assignment.
+                </p>
+            </div>
+        ),
+
+        icon: <UserOutlined className="text-blue-500" />,
+
+        okText: "Yes, Unassign",
+
+        okType: "primary",
+
+        cancelText: "Cancel",
+
+        onOk: async () => {
+
+    try {
+
+        if (!asset.current_assignment?.id) {
+            message.error("No standby assignment found.");
+            return;
+        }
+
+        await dispatch(
+            unassignStandbyAsset({
+                assignmentId: asset.current_assignment.id
+            })
+        ).unwrap();
+
+        message.success("Standby asset unassigned successfully");
+
+        await handleRefresh();
+
+    } catch (error) {
+
+        message.error(
+            error.message || "Failed to unassign standby asset"
+        );
+
+    }
+
+}
+
+    });
+};
 
   // Handle remove from pool
   const handleRemoveFromPool = async (assetId) => {
@@ -125,10 +212,32 @@ const StandbyPool = () => {
   };
 
   // Handle assign
+  // const handleAssignClick = (asset) => {
+  //   setSelectedAsset(asset);
+  //   setAssignModalVisible(true);
+  // };
   const handleAssignClick = (asset) => {
+  setModalMode("assign");
+  setSelectedAsset(asset);
+  setAssignModalVisible(true);
+};
+
+
+const handleReassignClick = (asset) => {
+
+    console.log(asset);
+
+    console.log(asset.current_assignment);
+
+    setModalMode("reassign");
     setSelectedAsset(asset);
     setAssignModalVisible(true);
-  };
+
+};
+
+const handleUnassignClick = (asset) => {
+    handleUnassignStandby(asset);
+}
 
   // Handle view details
   const handleViewDetails = (asset) => {
@@ -236,46 +345,71 @@ const StandbyPool = () => {
       width: 150,
       fixed: 'right',
       render: (_, record) => (
-        <Space size="small">
-          <Tooltip title="View Details">
-            <Button
-              type="link"
-              size="small"
-              icon={<EyeOutlined />}
-              onClick={() => handleViewDetails(record)}
-            />
-          </Tooltip>
-          {record.standby_available && !record.assigned_to && (
-            <>
-              <Tooltip title="Assign to User">
-                <Button
-                  type="link"
-                  size="small"
-                  icon={<UserAddOutlined />}
-                  onClick={() => handleAssignClick(record)}
-                />
-              </Tooltip>
-              <Popconfirm
-                title="Remove from standby pool?"
-                description="This asset will no longer be available as a standby asset."
-                onConfirm={() => handleRemoveFromPool(record.id)}
-                okText="Yes"
-                cancelText="No"
-              >
-                <Tooltip title="Remove from Pool">
-                  <Button
-                    type="link"
-                    size="small"
-                    danger
-                    icon={<DeleteOutlined />}
-                    loading={operationLoading}
-                  />
-                </Tooltip>
-              </Popconfirm>
-            </>
-          )}
-        </Space>
-      )
+  <Space size="small">
+    {/* View */}
+    <Tooltip title="View Details">
+      <Button
+        type="link"
+        size="small"
+        icon={<EyeOutlined />}
+        onClick={() => handleViewDetails(record)}
+      />
+    </Tooltip>
+
+    {/* Always keep Assign button */}
+    <Tooltip title="Assign User">
+      <Button
+        type="link"
+        size="small"
+        icon={<UserAddOutlined />}
+        onClick={() => handleAssignClick(record)}
+      />
+    </Tooltip>
+
+    {/* Show only if already assigned */}
+    {record.current_assignment && (
+      <>
+        <Tooltip title="Reassign">
+          <Button
+            type="link"
+            size="small"
+            icon={<SwapOutlined />}
+            onClick={() => handleReassignClick(record)}
+          />
+        </Tooltip>
+
+        <Tooltip title="Unassign">
+          <Button
+            type="link"
+            size="small"
+            danger
+            icon={<DisconnectOutlined />}
+            onClick={() => handleUnassignStandby(record)}
+          />
+        </Tooltip>
+      </>
+    )}
+
+    {/* Remove from Pool */}
+    <Popconfirm
+      title="Remove from standby pool?"
+      description="This asset will no longer be available as a standby asset."
+      onConfirm={() => handleRemoveFromPool(record.id)}
+      okText="Yes"
+      cancelText="No"
+    >
+      <Tooltip title="Remove from Pool">
+        <Button
+          type="link"
+          size="small"
+          danger
+          icon={<DeleteOutlined />}
+          loading={operationLoading}
+        />
+      </Tooltip>
+    </Popconfirm>
+  </Space>
+)
     }
   ];
 
@@ -439,7 +573,7 @@ const StandbyPool = () => {
         onSuccess={handleRefresh}
       />
 
-      <AssignStandbyModal
+      <AssignStandbyModal mode={modalMode}
         key={selectedAsset?.id || 'assign-modal'}
         visible={assignModalVisible}
         onClose={() => {
