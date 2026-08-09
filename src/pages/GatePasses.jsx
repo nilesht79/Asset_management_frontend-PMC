@@ -41,7 +41,8 @@ import {
   ShopOutlined,
   DesktopOutlined,
   ClearOutlined,
-  BranchesOutlined
+  BranchesOutlined,
+  DownloadOutlined
 } from '@ant-design/icons';
 import gatePassService from '../services/gatePass';
 import masterService from '../services/master';
@@ -90,6 +91,38 @@ const GatePasses = () => {
   const [selectedAsset, setSelectedAsset] = useState(null);
   // State to track if "Others" option is selected in asset search
   const [isOtherSelected, setIsOtherSelected] = useState(false);
+  const [userAssets, setUserAssets] = useState([]);
+    const handleExport = async () => {
+
+    try {
+
+        const params = {};
+
+        if (activeTab !== "all")
+            params.gate_pass_type = activeTab;
+
+        if (dateRange) {
+            params.date_from = dateRange[0].format("YYYY-MM-DD");
+            params.date_to = dateRange[1].format("YYYY-MM-DD");
+        }
+
+        if (searchText)
+            params.search = searchText;
+
+        if (serialNumberSearch)
+            params.serial_number = serialNumberSearch;
+
+        await gatePassService.exportExcel(params);
+
+        message.success("Excel downloaded.");
+
+    } catch {
+
+        message.error("Export failed.");
+
+    }
+
+};
 
   // Fetch dropdown data
   useEffect(() => {
@@ -150,6 +183,24 @@ const GatePasses = () => {
       setLoading(false);
     }
   }, [activeTab, dateRange, searchText, serialNumberSearch, pagination.limit]);
+
+    const fetchUserAssets = async (userId) => {
+
+    try {
+
+        const response = await gatePassService.getUserAssets(userId);
+
+        setUserAssets(response.data?.data || []);
+
+    } catch (err) {
+
+        console.error(err);
+
+        setUserAssets([]);
+
+    }
+
+};
 
   // Initial fetch
   useEffect(() => {
@@ -276,6 +327,10 @@ const GatePasses = () => {
 
     setAssetSearchText('');
     setAssetSearchResults([]);
+    setSelectedAsset(undefined);
+    createForm.setFieldsValue({
+    assetSearch: undefined
+      });
   };
 
   // Remove asset from selection
@@ -295,6 +350,9 @@ const GatePasses = () => {
     setCreateType(type);
     setCreateModalVisible(true);
     setSelectedAssets([]);
+    setSelectedAsset(undefined);
+    setAssetSearchText('');
+    setAssetSearchResults([]);
     createForm.resetFields();
     createForm.setFieldsValue({
       purpose: type === 'disposal_service' ? 'repair' : 'new_assignment',
@@ -390,6 +448,46 @@ const GatePasses = () => {
         </Space>
       )
     },
+   {
+  title: 'Serial Number',
+  dataIndex: 'serial_number',
+  key: 'serial_number',
+  width: 170,
+  ellipsis: true,
+  render: (text) => text || '-'
+},
+{
+  title: 'Category',
+  dataIndex: 'category_name',
+  key: 'category_name',
+  width: 140,
+  ellipsis: true,
+  render: (text) => text || '-'
+},
+{
+  title: 'Sub Category',
+  dataIndex: 'subcategory_name',
+  key: 'subcategory_name',
+  width: 180,
+  ellipsis: true,
+  render: (text) => text || '-'
+},
+{
+  title: 'Product',
+  dataIndex: 'product_name',
+  key: 'product_name',
+  width: 250,
+  ellipsis: true,
+  render: (text) => text || '-'
+},
+{
+  title: 'Model',
+  dataIndex: 'model',
+  key: 'model',
+  width: 200,
+  ellipsis: true,
+  render: (text) => text || '-'
+},
     {
       title: 'Type',
       dataIndex: 'gate_pass_type',
@@ -585,6 +683,12 @@ const GatePasses = () => {
               <Button icon={<ReloadOutlined />} onClick={() => fetchGatePasses(pagination.page)}>
                 Refresh
               </Button>
+              <Button type="primary"
+                icon={<DownloadOutlined />}
+                onClick={handleExport}
+            >
+                Export
+            </Button>
             </Space>
           </Col>
         </Row>
@@ -606,7 +710,7 @@ const GatePasses = () => {
               fetchGatePasses(page);
             }
           }}
-          scroll={{ x: 1100 }}
+          scroll={{ x: 1700 }}
           size="small"
         />
       </Card>
@@ -824,7 +928,9 @@ const GatePasses = () => {
               label="Recipient User"
               rules={[{ required: true, message: 'Please select recipient' }]}
             >
-              <Select placeholder="Select recipient" showSearch optionFilterProp="children">
+              {/* <Select placeholder="Select recipient" showSearch optionFilterProp="children"> */}
+              <Select placeholder="Select recipient" showSearch optionFilterProp="children" onChange={(value) => { createForm.setFieldsValue({ recipient_user_id: value});
+                          fetchUserAssets(value); setSelectedAssets([]);setSelectedAsset(null);}}>
                 {users.map(user => (
                   <Option key={user.id} value={user.id}>
                     {user.firstName} {user.lastName} ({user.employeeId || user.email})
@@ -886,9 +992,12 @@ const GatePasses = () => {
           </Form.Item> */}
 
           {/* Asset Search */}
-              <Form.Item label="Search and Add Assets">
+              {/* <Form.Item label="Search and Add Assets"> */}
+                <Form.Item name="assetSearch" label="Search and Add Assets">
                 <Select
+                key={selectedAssets.length}
                 showSearch
+                allowClear
                 placeholder="Search by asset tag, serial number, or product name..."
                 value={selectedAsset}
                 searchValue={assetSearchText}
@@ -905,27 +1014,34 @@ const GatePasses = () => {
                 }
                 onSelect={(value) => {
 
-                  // Proceed without asset
-                  if (value === 'other') {
-                    setSelectedAsset('other');
-                    setIsOtherSelected(true);
+    if (value === 'other') {
+        setSelectedAsset(undefined);
+        setIsOtherSelected(true);
+        setAssetSearchText('');
+        return;
+    }
 
-                    console.log('Proceed without asset');
+    const assets =
+        createType === 'end_user'
+            ? userAssets
+            : assetSearchResults;
 
-                    return;
-                  }
+    const asset = assets.find(a => a.id === value);
 
-                  // Normal asset selection
-                  setSelectedAsset(value);
+    if (asset) {
+        handleAddAsset(asset);
+    }
 
-                  const asset = assetSearchResults.find(
-                    (a) => a.id === value
-                  );
+    setSelectedAsset(undefined);
 
-                  if (asset) {
-                    handleAddAsset(asset);
-                  }
-                }}
+    setTimeout(() => {
+        setAssetSearchText('');
+        setAssetSearchResults([]);
+        createForm.setFieldsValue({
+            assetSearch: undefined
+        });
+    }, 0);
+}}
               >
                 {/* Other Option */}
                 <Option value="other">
@@ -933,7 +1049,8 @@ const GatePasses = () => {
                 </Option>
 
                 {/* Asset List */}
-                {assetSearchResults.map((asset) => (
+               
+                 {(createType === 'end_user' ? userAssets: assetSearchResults ).map((asset) => (
                   <Option key={asset.id} value={asset.id}>
                     <Space>
                       <DesktopOutlined />
