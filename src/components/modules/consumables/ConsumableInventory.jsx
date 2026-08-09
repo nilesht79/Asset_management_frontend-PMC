@@ -568,12 +568,20 @@ const ConsumableInventory = () => {
             <Select
               placeholder="Select consumable"
               showSearch
-              filterOption={(input, option) =>
-                option?.children?.toLowerCase()?.includes(input.toLowerCase())
-              }
+              filterOption={(input, option) => {
+              const text = String(option?.children?.props?.children || option?.label || '');
+              return text.toLowerCase().includes(input.toLowerCase());
+            }}
             >
+              
               {consumables.map(c => (
-                <Option key={c.id} value={c.id}>{c.name} ({c.code})</Option>
+                <Option
+                key={c.id}
+                value={c.id}
+                label={`${c.name} ${c.sku || c.code || ''}`}
+              >
+                {c.name} ({c.sku || c.code || ''})
+              </Option>
               ))}
             </Select>
           </Form.Item>
