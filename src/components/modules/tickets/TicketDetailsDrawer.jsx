@@ -229,25 +229,92 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
     if (onUpdate) onUpdate();
   };
 
-  const handleAddComment = async () => {
-    if (!newComment.trim() || !ticket) return;
+  // const handleAddComment = async () => {
+  //   if (!newComment.trim() || !ticket) return;
 
-    setSubmittingComment(true);
-    try {
-      await ticketService.addComment(ticket.ticket_id, {
-        comment_text: newComment,
-        is_internal: false
-      });
-      setNewComment('');
-      await fetchComments();
-      message.success('Comment added successfully');
-    } catch (error) {
-      console.error('Failed to add comment:', error);
-      message.error('Failed to add comment');
-    } finally {
-      setSubmittingComment(false);
-    }
-  };
+  //   setSubmittingComment(true);
+  //   try {
+  //     await ticketService.addComment(ticket.ticket_id, {
+  //       comment_text: newComment,
+  //       is_internal: false
+  //     });
+  //     setNewComment('');
+  //     await fetchComments();
+  //     message.success('Comment added successfully');
+  //   } catch (error) {
+  //     console.error('Failed to add comment:', error);
+  //     message.error('Failed to add comment');
+  //   } finally {
+  //     setSubmittingComment(false);
+  //   }
+  // };
+
+  const handleAddComment = async () => {
+  if (!newComment.trim() || !ticket) {
+    return;
+  }
+
+  setSubmittingComment(true);
+
+  try {
+    const formData = new FormData();
+
+    // Comment is mandatory
+    formData.append(
+      'comment_text',
+      newComment.trim()
+    );
+
+    // Internal comment
+    formData.append(
+      'is_internal',
+      'false'
+    );
+
+    // File is optional
+    attachmentList.forEach((file) => {
+      if (file.originFileObj) {
+        formData.append(
+          'attachments',
+          file.originFileObj
+        );
+      }
+    });
+
+    await ticketService.addComment(
+      ticket.ticket_id,
+      formData
+    );
+
+    // Clear form
+    setNewComment('');
+    setAttachmentList([]);
+
+    // Refresh comments
+    await fetchComments();
+
+    message.success(
+      attachmentList.length > 0
+        ? 'Comment and file added successfully'
+        : 'Comment added successfully'
+    );
+
+  } catch (error) {
+
+    console.error(
+      'Failed to add comment:',
+      error
+    );
+
+    message.error(
+      error?.response?.data?.message ||
+      'Failed to add comment'
+    );
+
+  } finally {
+    setSubmittingComment(false);
+  }
+};
 
   const handleViewRepairHistory = (assetId, assetTag) => {
     setRepairHistoryModal({ visible: true, assetId, assetTag });
