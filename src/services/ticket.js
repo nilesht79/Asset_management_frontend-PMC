@@ -163,18 +163,44 @@ const ticketService = {
   /**
    * Add comment to ticket
    */
-  addComment: async (ticketId, commentData) => {
-    try {
-      const response = await apiClient.post(
-        `/tickets/${ticketId}/comments`,
-        commentData
-      );
-      return response;
-    } catch (error) {
-      console.error('Error adding comment:', error);
-      throw error;
-    }
-  },
+  // addComment: async (ticketId, commentData) => {
+  //   try {
+  //     const response = await apiClient.post(
+  //       `/tickets/${ticketId}/comments`,
+  //       commentData
+  //     );
+  //     return response;
+  //   } catch (error) {
+  //     console.error('Error adding comment:', error);
+  //     throw error;
+  //   }
+  // },
+
+  /**
+ * Add comment to ticket with optional attachments
+ */
+addComment: async (ticketId, commentData) => {
+  try {
+    const isFormData = commentData instanceof FormData;
+
+    const response = await apiClient.post(
+      `/tickets/${ticketId}/comments`,
+      commentData,
+      isFormData
+        ? {
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            }
+          }
+        : {}
+    );
+
+    return response;
+  } catch (error) {
+    console.error('Error adding comment:', error);
+    throw error;
+  }
+},
 
   /**
    * Get comments for ticket
