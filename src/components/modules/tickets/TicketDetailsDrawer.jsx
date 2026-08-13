@@ -285,7 +285,6 @@ const handleAddComment = async () => {
     );
 
     // Clear form
-    setNewComment('');
     const hadAttachments = attachmentList.length > 0;
 
 setNewComment('');
@@ -1001,36 +1000,44 @@ message.success(
       </div>
     )}
 
-    {/* FILE SELECTOR */}
-    <Upload
-      multiple
-      showUploadList={false}
-      beforeUpload={() => false}
-      fileList={attachmentList}
-      onChange={({ fileList }) => {
-        setAttachmentList(fileList);
-      }}
-      accept=".jpg,.jpeg,.png,.pdf"
-    >
-      <Button icon={<UploadOutlined />}>
-        {attachmentList.length > 0
-          ? 'Add More Files'
-          : 'Upload File'}
-      </Button>
-    </Upload>
+  {/* ACTION BUTTONS */}
+<div
+  style={{
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 8
+  }}
+>
+  {/* FILE SELECTOR */}
+  <Upload
+    multiple
+    showUploadList={false}
+    beforeUpload={() => false}
+    fileList={attachmentList}
+    onChange={({ fileList }) => {
+      setAttachmentList(fileList);
+    }}
+    accept=".jpg,.jpeg,.png,.pdf"
+  >
+    <Button icon={<UploadOutlined />}>
+      {attachmentList.length > 0
+        ? 'Add More Files'
+        : 'Upload File'}
+    </Button>
+  </Upload>
 
-    {/* ADD COMMENT */}
-    <div className="flex justify-end">
-      <Button
-        type="primary"
-        icon={<SendOutlined />}
-        loading={submittingComment}
-        disabled={!newComment.trim()}
-        onClick={handleAddComment}
-      >
-        Add Comment
-      </Button>
-    </div>
+  {/* ADD COMMENT */}
+  <Button
+    type="primary"
+    icon={<SendOutlined />}
+    loading={submittingComment}
+    disabled={!newComment.trim()}
+    onClick={handleAddComment}
+  >
+    Add Comment
+  </Button>
+</div>
 
   </div>
 )}
