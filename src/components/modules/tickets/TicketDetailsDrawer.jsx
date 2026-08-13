@@ -54,7 +54,7 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
   const [comments, setComments] = useState([]);
   const [loadingComments, setLoadingComments] = useState(false);
   const [newComment, setNewComment] = useState('');
-  const [fileList, setFileList] = useState([]);
+const [attachmentList, setAttachmentList] = useState([]);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [closeRequestHistory, setCloseRequestHistory] = useState([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -64,7 +64,7 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
   const [flagServiceTypeVisible, setFlagServiceTypeVisible] = useState(false);
   const [reviewServiceTypeVisible, setReviewServiceTypeVisible] = useState(false);
   const [pendingServiceTypeRequest, setPendingServiceTypeRequest] = useState(null);
-  const { Dragger } = Upload;
+  // const { Dragger } = Upload;
   const [attachments, setAttachments] = useState([]);
   const BASE_URL = "https://itsm.mmrdaindia.com";
   
@@ -85,25 +85,25 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
   const { user: currentUser } = useSelector((state) => state.auth);
   const userRole = currentUser?.role;
 
-  const handleUploadFile = async () => {
-  if (fileList.length === 0 || !ticket) return;
+//   const handleUploadFile = async () => {
+//   if (fileList.length === 0 || !ticket) return;
 
-  try {
-    const formData = new FormData();
-    formData.append('file', fileList[0].originFileObj);
-    // console.log("Uploading file:", fileList[0].originFileObj);
+//   try {
+//     const formData = new FormData();
+//     formData.append('file', fileList[0].originFileObj);
+//     // console.log("Uploading file:", fileList[0].originFileObj);
 
-    await ticketService.uploadAttachment(ticket.ticket_id, formData);
+//     await ticketService.uploadAttachment(ticket.ticket_id, formData);
 
-    setFileList([]);
-    await fetchAttachments();
+//     setFileList([]);
+//     await fetchAttachments();
 
-    message.success('File uploaded successfully');
-  } catch (error) {
-    console.error(error);
-    message.error('Upload failed');
-  }
-};
+//     message.success('File uploaded successfully');
+//   } catch (error) {
+//     console.error(error);
+//     message.error('Upload failed');
+//   }
+// };
 
   const formatDateTime = (date) => {
   const d = new Date(date);
@@ -249,7 +249,7 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
   //   }
   // };
 
-  const handleAddComment = async () => {
+const handleAddComment = async () => {
   if (!newComment.trim() || !ticket) {
     return;
   }
@@ -259,19 +259,17 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
   try {
     const formData = new FormData();
 
-    // Comment is mandatory
     formData.append(
       'comment_text',
       newComment.trim()
     );
 
-    // Internal comment
     formData.append(
       'is_internal',
       'false'
     );
 
-    // File is optional
+    // Add selected files
     attachmentList.forEach((file) => {
       if (file.originFileObj) {
         formData.append(
@@ -290,8 +288,9 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
     setNewComment('');
     setAttachmentList([]);
 
-    // Refresh comments
+    // Reload comments
     await fetchComments();
+await fetchAttachments();
 
     message.success(
       attachmentList.length > 0
@@ -300,7 +299,6 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
     );
 
   } catch (error) {
-
     console.error(
       'Failed to add comment:',
       error
@@ -912,10 +910,9 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
             </div>
           )} */}
 
-         {ticket.status !== 'closed' && (
-  <div className="space-y-3">
+     {ticket.status !== 'closed' && (
+  <div className="space-y-2">
 
-    {/* ================= COMMENT ================= */}
     <TextArea
       rows={3}
       placeholder="Add a comment..."
@@ -924,203 +921,109 @@ const TicketDetailsDrawer = ({ visible, ticket, onClose, onUpdate }) => {
       maxLength={500}
     />
 
-    <Button
-      type="primary"
-      icon={<SendOutlined />}
-      onClick={handleAddComment}
-      loading={submittingComment}
-      disabled={!newComment.trim()}
-    >
-      Add Comment
-    </Button>
 
-    {/* ================= UPLOAD TITLE ================= */}
-    <Card
-      style={{ marginTop: '10px' }}
-      title={
-        <div className="flex items-center space-x-2">
-          <UploadOutlined />
-          <span>Upload File</span>
-        </div>
-      }
-      size="small"
-    >
+    {attachmentList.length > 0 && (
 
-      {/* ================= DRAGGER ================= */}
-      <Dragger
-        fileList={fileList}
-        beforeUpload={() => false}
-        accept=".jpg,.jpeg,.png,.pdf"
-        maxCount={1}
-        showUploadList={false}
-        onChange={({ fileList }) => {
-          if (fileList.length > 1) {
-            message.warning('Only 1 file allowed');
-          }
-          setFileList(fileList.slice(-1));
+      <div
+        style={{
+          marginTop: 12,
+          border: "1px solid #ddd",
+          borderRadius: 6,
+          padding: 10
         }}
       >
-        {fileList.length > 0 ? (
 
-          <div className="flex items-center justify-between border p-2 rounded">
+        <h4>
+          Selected Files
+        </h4>
 
-            <div className="flex items-center gap-2">
-              {fileList[0].type?.includes('image') ? (
-                <img
-                  src={URL.createObjectURL(fileList[0].originFileObj)}
-                  style={{
-                    width: 60,
-                    height: 60,
-                    objectFit: 'contain',
-                    borderRadius: 6
-                  }}
-                />
-              ) : (
-                <div style={{ fontSize: 24 }}>📄</div>
-              )}
 
-              <div style={{ fontSize: 12 }}>
-                {fileList[0].name}
-              </div>
-            </div>
+        {attachmentList.map(file => (
+
+          <div
+            key={file.uid}
+            style={{
+              display:"flex",
+              justifyContent:"space-between",
+              alignItems:"center",
+              marginBottom:8
+            }}
+          >
+
+            <span>
+              📎 {file.name}
+            </span>
+
 
             <Button
               danger
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                setFileList([]);
+              type="text"
+              onClick={() => {
+
+                setAttachmentList(prev =>
+                  prev.filter(
+                    x => x.uid !== file.uid
+                  )
+                );
+
               }}
             >
               Remove
             </Button>
 
+
           </div>
 
-        ) : (
-          <>
-            <p className="ant-upload-drag-icon">
-              <UploadOutlined />
-            </p>
-            <p className="ant-upload-text">
-              Click or drag file to upload
-            </p>
-            <p className="ant-upload-hint">
-              Only JPG, PNG, PDF allowed (Max 5MB)
-            </p>
-          </>
-        )}
-      </Dragger>
+        ))}
 
-      {/* ================= UPLOAD BUTTON ================= */}
-      <div className="flex justify-end mt-2">
-        <Button
-          type="primary"
-          onClick={handleUploadFile}
-          disabled={fileList.length === 0}
-        >
-          Upload File
-        </Button>
-        {/* 🔥 SHOW UPLOADED FILES */}
-      </div>
-      <div className="mt-3 space-y-2">
-  {attachments && attachments.length > 0 ? (
-    attachments.map(file => (
-      <div key={file.attachment_id} className="flex items-center justify-between border p-2 rounded">
-
-        <div className="flex items-center gap-2">
-
-          {file.file_type?.includes('image') ? (
-            <img
-              src={`${BASE_URL}${file.file_path}`}
-              style={{
-                width: 60,
-                height: 60,
-                objectFit: 'cover',
-                borderRadius: 6
-              }}
-            />
-          ) : (
-            <div style={{ fontSize: 24 }}>📄</div>
-          )}
-
-          <div style={{ fontSize: 12 }}>
-            {file.file_name}
-          </div>
-
-        </div>
-
-        <a
-          href={`https://itsm.mmrdaindia.com${file.file_path}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View
-        </a>
-
-      </div>
-    ))
-  ) : (
-    <div className="text-gray-400 text-sm">
-      {/* No files uploaded */}
-    </div>
-  )}
-</div>
-
-      {/* ================= UPLOADED FILES ================= */}
-      <div className="mt-3 space-y-2">
-
-        {attachments && attachments.length > 0 ? (
-          attachments
-            .filter(file => file.uploaded_by_role === 'engineer') // 🔥 remove this line if not needed
-            .map(file => (
-              <div
-                key={file.attachment_id}
-                className="flex items-center justify-between border p-2 rounded"
-              >
-
-                <div className="flex items-center gap-2">
-
-                  {/* IMAGE */}
-                  {file.file_type?.includes('image') ? (
-                    <img
-                      src={`${BASE_URL}${file.file_path}`}
-                      style={{
-                        width: 60,
-                        height: 60,
-                        objectFit: 'cover',
-                        borderRadius: 6
-                      }}
-                    />
-                  ) : (
-                    <div style={{ fontSize: 24 }}>📄</div>
-                  )}
-
-                  <div style={{ fontSize: 12 }}>
-                    {file.file_name}
-                  </div>
-
-                </div>
-
-                <a
-                  href={`https://itsm.mmrdaindia.com${file.file_path}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  View
-                </a>
-
-              </div>
-            ))
-        ) : (
-          <div className="text-gray-400 text-sm">
-            {/* No files uploaded */}
-          </div>
-        )}
 
       </div>
 
-    </Card>
+    )}
+
+
+
+    <Upload
+
+      multiple
+
+      showUploadList={false}
+
+      beforeUpload={() => false}
+
+      fileList={attachmentList}
+
+      onChange={({fileList}) => {
+
+        setAttachmentList(fileList);
+
+      }}
+
+      accept=".jpg,.jpeg,.png,.pdf"
+
+    >
+
+      <Button icon={<UploadOutlined />}>
+  {attachmentList.length > 0
+    ? "Add More Files"
+    : "Upload File"}
+</Button>
+
+    </Upload>
+
+
+
+   <Button
+  type="primary"
+  icon={<SendOutlined />}
+  loading={submittingComment}
+  disabled={!newComment.trim()}
+  onClick={handleAddComment}
+  style={{ marginLeft: 8 }}
+>
+  Add Comment
+</Button>
+
 
   </div>
 )}
