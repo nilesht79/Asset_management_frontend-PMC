@@ -286,18 +286,19 @@ const handleAddComment = async () => {
 
     // Clear form
     setNewComment('');
-    setAttachmentList([]);
+    const hadAttachments = attachmentList.length > 0;
 
-    // Reload comments
-    await fetchComments();
+setNewComment('');
+setAttachmentList([]);
+
+await fetchComments();
 await fetchAttachments();
 
-    message.success(
-      attachmentList.length > 0
-        ? 'Comment and file added successfully'
-        : 'Comment added successfully'
-    );
-
+message.success(
+  hadAttachments
+    ? 'Comment and file added successfully'
+    : 'Comment added successfully'
+);
   } catch (error) {
     console.error(
       'Failed to add comment:',
