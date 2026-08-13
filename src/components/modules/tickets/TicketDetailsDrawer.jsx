@@ -926,9 +926,10 @@ await fetchAttachments();
             </div>
           )} */}
 
-     {ticket.status !== 'closed' && (
-  <div className="space-y-2">
+{ticket.status !== 'closed' && (
+  <div className="space-y-3">
 
+    {/* COMMENT */}
     <TextArea
       rows={3}
       placeholder="Add a comment..."
@@ -937,109 +938,98 @@ await fetchAttachments();
       maxLength={500}
     />
 
-
+    {/* SELECTED FILES */}
     {attachmentList.length > 0 && (
-
       <div
         style={{
-          marginTop: 12,
-          border: "1px solid #ddd",
+          border: '1px solid #d9d9d9',
           borderRadius: 6,
-          padding: 10
+          padding: 10,
+          background: '#fafafa'
         }}
       >
-
-        <h4>
+        <div
+          style={{
+            fontWeight: 500,
+            marginBottom: 8
+          }}
+        >
           Selected Files
-        </h4>
+        </div>
 
-
-        {attachmentList.map(file => (
-
+        {attachmentList.map((file) => (
           <div
             key={file.uid}
             style={{
-              display:"flex",
-              justifyContent:"space-between",
-              alignItems:"center",
-              marginBottom:8
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              padding: '6px 0'
             }}
           >
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 8
+              }}
+            >
+              <span>📎</span>
 
-            <span>
-              📎 {file.name}
-            </span>
-
+              <span>
+                {file.name}
+              </span>
+            </div>
 
             <Button
               danger
               type="text"
+              size="small"
               onClick={() => {
-
-                setAttachmentList(prev =>
+                setAttachmentList((prev) =>
                   prev.filter(
-                    x => x.uid !== file.uid
+                    (item) => item.uid !== file.uid
                   )
                 );
-
               }}
             >
               Remove
             </Button>
-
-
           </div>
-
         ))}
-
-
       </div>
-
     )}
 
-
-
+    {/* FILE SELECTOR */}
     <Upload
-
       multiple
-
       showUploadList={false}
-
       beforeUpload={() => false}
-
       fileList={attachmentList}
-
-      onChange={({fileList}) => {
-
+      onChange={({ fileList }) => {
         setAttachmentList(fileList);
-
       }}
-
       accept=".jpg,.jpeg,.png,.pdf"
-
     >
-
       <Button icon={<UploadOutlined />}>
-  {attachmentList.length > 0
-    ? "Add More Files"
-    : "Upload File"}
-</Button>
-
+        {attachmentList.length > 0
+          ? 'Add More Files'
+          : 'Upload File'}
+      </Button>
     </Upload>
 
-
-
-   <Button
-  type="primary"
-  icon={<SendOutlined />}
-  loading={submittingComment}
-  disabled={!newComment.trim()}
-  onClick={handleAddComment}
-  style={{ marginLeft: 8 }}
->
-  Add Comment
-</Button>
-
+    {/* ADD COMMENT */}
+    <div className="flex justify-end">
+      <Button
+        type="primary"
+        icon={<SendOutlined />}
+        loading={submittingComment}
+        disabled={!newComment.trim()}
+        onClick={handleAddComment}
+      >
+        Add Comment
+      </Button>
+    </div>
 
   </div>
 )}
