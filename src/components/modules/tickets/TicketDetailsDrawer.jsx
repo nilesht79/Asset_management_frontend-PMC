@@ -67,18 +67,37 @@ const [attachmentList, setAttachmentList] = useState([]);
   // const { Dragger } = Upload;
   const [attachments, setAttachments] = useState([]);
   // const BASE_URL = "https://itsm.mmrdaindia.com";
-  const BASE_URL = window.location.origin;
+const BASE_URL = window.location.origin;
+
+const getAttachmentUrl = (filePath) => {
+  if (!filePath) return '#';
+
+  if (filePath.startsWith('http://') || filePath.startsWith('https://')) {
+    console.log('ATTACHMENT URL:', filePath);
+    return filePath;
+  }
+
+  const normalizedPath = filePath.startsWith('/')
+    ? filePath
+    : `/${filePath}`;
+
+  const url = `${BASE_URL}${normalizedPath}`;
+
+  console.log('ATTACHMENT FILE PATH:', filePath);
+  console.log('ATTACHMENT URL:', url);
+
+  return url;
+};
   
-  const fetchAttachments = async () => {
+const fetchAttachments = async () => {
   try {
     const res = await ticketService.getAttachments(ticket.ticket_id);
 
-    console.log("ATTACHMENTS API:", res.data); // 🔍 debug
+    console.log("ATTACHMENTS API:", res.data);
 
     const data = res.data?.data || res.data;
 
     setAttachments(Array.isArray(data) ? data : []);
-
   } catch (err) {
     console.error("Failed to fetch attachments", err);
   }
@@ -868,17 +887,22 @@ message.success(
 
                         {comment.attachments?.length > 0 && (
   <div className="mt-2 space-y-1">
-    {comment.attachments.map((attachment) => (
-      <div key={attachment.attachment_id}>
-        <a
-          href={`${BASE_URL}${attachment.file_path}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          📎 {attachment.file_name}
-        </a>
-      </div>
-    ))}
+    {comment.attachments.map((attachment) => {
+      const attachmentUrl = getAttachmentUrl(attachment.file_path);
+
+      return (
+        <div key={attachment.attachment_id}>
+         <a
+  href={getAttachmentUrl(attachment.file_path)}
+  target="_blank"
+  rel="noopener noreferrer"
+  onClick={(e) => e.stopPropagation()}
+>
+  📎 {attachment.file_name}
+</a>
+        </div>
+      );
+    })}
   </div>
 )}
                         
