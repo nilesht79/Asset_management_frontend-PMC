@@ -66,7 +66,8 @@ const [attachmentList, setAttachmentList] = useState([]);
   const [pendingServiceTypeRequest, setPendingServiceTypeRequest] = useState(null);
   // const { Dragger } = Upload;
   const [attachments, setAttachments] = useState([]);
-  const BASE_URL = "https://itsm.mmrdaindia.com";
+  // const BASE_URL = "https://itsm.mmrdaindia.com";
+  const BASE_URL = window.location.origin;
   
   const fetchAttachments = async () => {
   try {
