@@ -864,6 +864,22 @@ await fetchAttachments();
                         <div className="mt-1 text-gray-700">
                           {comment.comment_text}
                         </div>
+
+                        {comment.attachments?.length > 0 && (
+  <div className="mt-2 space-y-1">
+    {comment.attachments.map((attachment) => (
+      <div key={attachment.attachment_id}>
+        <a
+          href={`${BASE_URL}${attachment.file_path}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          📎 {attachment.file_name}
+        </a>
+      </div>
+    ))}
+  </div>
+)}
                         
                         {comment.is_internal && (
                           <Tag size="small" color="orange" className="mt-1">
