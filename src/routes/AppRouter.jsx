@@ -73,6 +73,8 @@ import SlaComplianceReport from '../pages/SlaComplianceReport'
 import TicketTrendAnalysis from '../pages/TicketTrendAnalysis'
 import ConsumablesConsumptionReport from '../pages/ConsumablesConsumptionReport'
 import AssetJobReports from '../pages/AssetJobReports'
+import VCCallReport from '../pages/VCCallReport'
+import ServerReport from '../pages/ServerReport'
 
 // Gate Pass Management
 import GatePasses from '../pages/GatePasses'
@@ -243,6 +245,22 @@ const AppRouter = () => {
         {/* Asset Job Reports - IT Asset Install/Move/Transfer - Coordinator, Admin, Superadmin, IT Head */}
         {['it_head', 'coordinator', 'admin', 'superadmin'].includes(user?.role) && (
           <Route path="reports/asset-job-reports" element={<AssetJobReports />} />
+        )}
+
+        {/* VC Call Report - IT Head, Coordinator, Admin, Superadmin */}
+        {['it_head', 'coordinator', 'admin', 'superadmin'].includes(user?.role) && (
+          <Route
+            path="reports/vc-call-report"
+            element={<VCCallReport />}
+          />
+        )}
+        
+        {/* Server Report - IT Head, Coordinator, Admin, Superadmin */}
+        {['it_head', 'coordinator', 'admin', 'superadmin'].includes(user?.role) && (
+          <Route
+            path="reports/server-report"
+            element={<ServerReport />}
+          />
         )}
 
         {/* Gate Pass Management - Coordinator, Admin, Superadmin, IT Head */}
