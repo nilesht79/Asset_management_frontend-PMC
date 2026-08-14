@@ -239,6 +239,16 @@ const Sidebar = () => {
               icon: <DesktopOutlined />,
               label: 'Asset Job Reports',
             },
+            {
+            key: '/reports/vc-call-report',
+            icon: <MessageOutlined />,
+            label: 'VC Call Report',
+          },
+          {
+            key: '/reports/server-report',
+            icon: <CloudServerOutlined />,
+            label: 'Server Report',
+          },
           ],
         },
         // Audit Logs
@@ -438,6 +448,16 @@ const Sidebar = () => {
               icon: <DesktopOutlined />,
               label: 'Asset Job Reports',
             },
+            {
+            key: '/reports/vc-call-report',
+            icon: <MessageOutlined />,
+            label: 'VC Call Report',
+          },
+          {
+            key: '/reports/server-report',
+            icon: <CloudServerOutlined />,
+            label: 'Server Report',
+          },
           ],
         },
         // Gate Pass Management
@@ -577,6 +597,16 @@ const Sidebar = () => {
               icon: <DesktopOutlined />,
               label: 'Asset Job Reports',
             },
+            {
+              key: '/reports/vc-call-report',
+              icon: <MessageOutlined />,
+              label: 'VC Call Report',
+            },
+            {
+              key: '/reports/server-report',
+              icon: <CloudServerOutlined />,
+              label: 'Server Report',
+            },
           ],
         },
         // Gate Pass Management
@@ -714,6 +744,8 @@ const Sidebar = () => {
     if (pathname.startsWith('/reports/ticket-trends')) return ['/reports/ticket-trends']
     if (pathname.startsWith('/reports/consumables-consumption')) return ['/reports/consumables-consumption']
     if (pathname.startsWith('/reports/asset-job-reports')) return ['/reports/asset-job-reports']
+    if (pathname.startsWith('/reports/vc-call-report')) return ['/reports/vc-call-report']
+    if (pathname.startsWith('/reports/server-report')) return ['/reports/server-report']
 
     // Department Management routes
     if (pathname.startsWith('/department/assets')) return ['/department/assets']
