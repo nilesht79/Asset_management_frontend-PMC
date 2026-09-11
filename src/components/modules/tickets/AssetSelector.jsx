@@ -133,11 +133,17 @@ const AssetSelector = ({
               (of {asset.parent_asset_tag})
             </Text>
           )}
-          {asset.oem_name && (
+          /* {asset.oem_name && (
             <Tag color="purple" style={{ fontSize: '10px' }}>
               {asset.oem_name}
             </Tag>
-          )}
+          )} */
+
+          {asset.subcategory_name && (
+  <Tag color="purple" style={{ fontSize: '10px' }}>
+    {asset.subcategory_name}
+  </Tag>
+)}
           <Tag
             color={getStatusColor(asset.status)}
             style={{ fontSize: '10px' }}
