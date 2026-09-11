@@ -143,9 +143,14 @@ const EditTicketModal = ({ visible, ticket, onClose, onSuccess, currentUser }) =
       };
 
       // Include asset_ids for Hardware category
-      if (selectedCategory === 'Hardware') {
-        updateData.asset_ids = selectedAssets;
-      }
+      // if (selectedCategory === 'Hardware') {
+      //   updateData.asset_ids = selectedAssets;
+      // }
+      if (values.category === 'Hardware') {
+    updateData.asset_ids = Array.isArray(selectedAssets)
+        ? selectedAssets.filter(Boolean)
+        : [];
+}
 
       // Include software_installation_ids for Software category
       if (selectedCategory === 'Software') {
