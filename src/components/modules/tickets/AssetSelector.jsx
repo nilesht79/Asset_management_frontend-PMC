@@ -77,17 +77,31 @@ const AssetSelector = ({
   };
 
   // Filter assets based on search
-  const filteredAssets = useMemo(() => {
-    if (!searchText) return assets;
+  // const filteredAssets = useMemo(() => {
+  //   if (!searchText) return assets;
 
-    const search = searchText.toLowerCase();
-    return assets.filter(asset =>
-      asset.asset_tag?.toLowerCase().includes(search) ||
-      asset.serial_number?.toLowerCase().includes(search) ||
-      asset.product_name?.toLowerCase().includes(search) ||
-      asset.oem_name?.toLowerCase().includes(search)
-    );
-  }, [assets, searchText]);
+  //   const search = searchText.toLowerCase();
+  //   return assets.filter(asset =>
+  //     asset.asset_tag?.toLowerCase().includes(search) ||
+  //     asset.serial_number?.toLowerCase().includes(search) ||
+  //     asset.product_name?.toLowerCase().includes(search) ||
+  //     asset.oem_name?.toLowerCase().includes(search)
+  //   );
+  // }, [assets, searchText]);
+
+  const filteredAssets = useMemo(() => {
+  if (!searchText) return assets;
+
+  const search = searchText.toLowerCase();
+
+  return assets.filter(asset =>
+    asset.asset_tag?.toLowerCase().includes(search) ||
+    asset.serial_number?.toLowerCase().includes(search) ||
+    asset.product_name?.toLowerCase().includes(search) ||
+    asset.subcategory_name?.toLowerCase().includes(search) ||
+    asset.oem_name?.toLowerCase().includes(search)
+  );
+}, [assets, searchText]);
 
   const getStatusColor = (status) => {
     const colors = {
@@ -133,11 +147,17 @@ const AssetSelector = ({
               (of {asset.parent_asset_tag})
             </Text>
           )}
-          {asset.oem_name && (
+          /* {asset.oem_name && (
             <Tag color="purple" style={{ fontSize: '10px' }}>
               {asset.oem_name}
             </Tag>
-          )}
+          )} */
+
+          {asset.subcategory_name && (
+  <Tag color="purple" style={{ fontSize: '10px' }}>
+    {asset.subcategory_name}
+  </Tag>
+)}
 
           
           <Tag
