@@ -710,7 +710,8 @@ const Users = () => {
     if (filters.search) activeFilters.push({ key: 'search', label: `Search: ${filters.search}` })
     if (filters.status !== 'active') activeFilters.push({ key: 'status', label: `Status: ${filters.status === 'inactive' ? 'Inactive' : 'All'}` })
     if (filters.role) {
-      const roleObj = availableRoles.find(r => r.value === filters.role)
+      // const roleObj = availableRoles.find(r => r.value === filters.role)
+      const roleObj = allRoles.find(r => r.value === filters.role)
       activeFilters.push({ key: 'role', label: `Role: ${roleObj?.label || filters.role}` })
     }
     if (filters.board_id) {
@@ -871,7 +872,15 @@ const Users = () => {
     }
   ]
 
-  const availableRoles = userService.getAvailableRoles(currentUser?.role)
+  // const availableRoles = userService.getAvailableRoles(currentUser?.role)
+  // const activeFilters = getActiveFilters()
+
+  const allRoles = userService.getAllRoles()
+
+  const availableRoles = userService.getAvailableRoles(
+    currentUser?.role
+  )
+  
   const activeFilters = getActiveFilters()
 
   return (
@@ -1122,7 +1131,7 @@ const Users = () => {
                 rules={[{ required: true, message: 'Role is required' }]}
               >
                 <Select>
-                  {availableRoles.map(role => (
+                  {allRoles.map(role => (
                     <Option key={role.value} value={role.value}>
                       {role.label}
                     </Option>
