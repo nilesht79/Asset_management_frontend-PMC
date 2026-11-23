@@ -267,19 +267,45 @@ const userService = {
     return currentLevel > targetLevel
   },
 
-  getAvailableRoles: (currentUserRole) => {
-    const hierarchy = userService.getRoleHierarchy()
-    const currentLevel = hierarchy[currentUserRole] || 0
+  // getAvailableRoles: (currentUserRole) => {
+  //   const hierarchy = userService.getRoleHierarchy()
+  //   const currentLevel = hierarchy[currentUserRole] || 0
     
-    return Object.entries(hierarchy)
-      .filter(([, level]) => level < currentLevel)
-      .map(([role]) => ({
-        value: role,
-        label: userService.getRoleDisplayName(role),
-        level: hierarchy[role]
-      }))
-      .sort((a, b) => b.level - a.level)
-  },
+  //   return Object.entries(hierarchy)
+  //     .filter(([, level]) => level < currentLevel)
+  //     .map(([role]) => ({
+  //       value: role,
+  //       label: userService.getRoleDisplayName(role),
+  //       level: hierarchy[role]
+  //     }))
+  //     .sort((a, b) => b.level - a.level)
+  // },
+
+  getAllRoles: () => {
+  const hierarchy = userService.getRoleHierarchy()
+
+  return Object.entries(hierarchy)
+    .map(([role, level]) => ({
+      value: role,
+      label: userService.getRoleDisplayName(role),
+      level
+    }))
+    .sort((a, b) => b.level - a.level)
+},
+
+getAvailableRoles: (currentUserRole) => {
+  const hierarchy = userService.getRoleHierarchy()
+  const currentLevel = hierarchy[currentUserRole] || 0
+
+  return Object.entries(hierarchy)
+    .filter(([, level]) => level < currentLevel)
+    .map(([role]) => ({
+      value: role,
+      label: userService.getRoleDisplayName(role),
+      level: hierarchy[role]
+    }))
+    .sort((a, b) => b.level - a.level)
+},
 
   // Search and filter utilities
   buildSearchParams: (filters, pagination = {}) => {
