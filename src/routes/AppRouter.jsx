@@ -103,13 +103,15 @@ const AppRouter = () => {
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
         
-        {/* User Management Routes - Admin/Superadmin only */}
-        {['admin', 'superadmin'].includes(user?.role) && (
-          <>
+        {/* User Master - Admin, Superadmin and Coordinator */}
+          {['admin', 'superadmin', 'coordinator'].includes(user?.role) && (
             <Route path="users" element={<Users />} />
+          )}
+          
+          {/* Department Master - Admin/Superadmin only */}
+          {['admin', 'superadmin'].includes(user?.role) && (
             <Route path="departments" element={<DepartmentMaster />} />
-          </>
-        )}
+          )}
 
         {/* Master Data Routes - Admin/Superadmin only */}
         {['admin', 'superadmin'].includes(user?.role) && (
