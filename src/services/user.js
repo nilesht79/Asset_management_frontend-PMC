@@ -293,12 +293,47 @@ const userService = {
     .sort((a, b) => b.level - a.level)
 },
 
-getAvailableRoles: (currentUserRole) => {
+// getAvailableRoles: (currentUserRole) => {
+//   const hierarchy = userService.getRoleHierarchy()
+//   const currentLevel = hierarchy[currentUserRole] || 0
+
+//   return Object.entries(hierarchy)
+//     .filter(([, level]) => level < currentLevel)
+//     .map(([role]) => ({
+//       value: role,
+//       label: userService.getRoleDisplayName(role),
+//       level: hierarchy[role]
+//     }))
+//     .sort((a, b) => b.level - a.level)
+// },
+
+  getAvailableRoles: (currentUserRole) => {
   const hierarchy = userService.getRoleHierarchy()
+
+  // Coordinator can filter all manageable roles
+  if (currentUserRole === 'coordinator') {
+    const coordinatorRoles = [
+      'it_head',
+      'department_head',
+      'department_coordinator',
+      'engineer',
+      'employee'
+    ]
+
+    return coordinatorRoles.map(role => ({
+      value: role,
+      label: userService.getRoleDisplayName(role),
+      level: hierarchy[role] || 0
+    }))
+  }
+
+  // Existing hierarchy logic for other roles
   const currentLevel = hierarchy[currentUserRole] || 0
 
   return Object.entries(hierarchy)
-    .filter(([, level]) => level < currentLevel)
+    .filter(([role, level]) =>
+      level < currentLevel && role !== 'coordinator'
+    )
     .map(([role]) => ({
       value: role,
       label: userService.getRoleDisplayName(role),
