@@ -323,6 +323,20 @@ const Sidebar = () => {
 
     // Coordinator items - Asset allocation, movement, ticketing workflows
     if (['coordinator'].includes(user?.role)) {
+
+      // User Management - Coordinator
+      baseItems.push({
+        key: 'users',
+        icon: <TeamOutlined />,
+        label: 'User Management',
+        children: [
+          {
+            key: '/users',
+            label: 'User Master',
+          },
+        ],
+      })
+      
       baseItems.push(
         {
           key: 'assets',
