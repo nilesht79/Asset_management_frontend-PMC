@@ -3296,10 +3296,22 @@ const AssetInventory = () => {
                       </Text>
                     </div>
 
-                    <div className="mt-2">
+                    {/* <div className="mt-2">
                       <Text type="secondary">
                         User ID: {activity.user_id || 'N/A'}
                       </Text>
+                    </div> */}
+
+                    <div className="mt-2 space-y-1">
+                      <Text type="secondary">
+                        **Performed By:** {activity.user_name || activity.user_id || 'Unknown User'}
+                      </Text>
+                    
+                      <div>
+                        <Text type="secondary">
+                          **Role:** {activity.user_role || 'Unknown'}
+                        </Text>
+                      </div>
                     </div>
 
                     {activity.changes && (
