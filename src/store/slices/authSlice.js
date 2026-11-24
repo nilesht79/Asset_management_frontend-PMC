@@ -42,13 +42,25 @@ export const login = createAsyncThunk(
           scope: responseData.scope
         }
       }
-    } catch (error) {
-      return rejectWithValue({
-        message: error.response?.data?.message || error.message || 'Login failed',
-        status: error.response?.status,
-        errors: error.response?.data?.errors
-      })
-    }
+    // } catch (error) {
+    //   return rejectWithValue({
+    //     message: error.response?.data?.message || error.message || 'Login failed',
+    //     status: error.response?.status,
+    //     errors: error.response?.data?.errors
+    //   })
+    // }
+      } catch (error) {
+  const message = !error.response
+    ? 'Unable to connect to the server. Please try again.'
+    : error.response?.data?.message ||
+      'Invalid Employee ID or password.';
+
+  return rejectWithValue({
+    message,
+    status: error.response?.status,
+    errors: error.response?.data?.errors
+  });
+}
   }
 )
 
