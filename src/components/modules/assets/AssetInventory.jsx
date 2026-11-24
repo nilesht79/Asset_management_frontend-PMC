@@ -627,10 +627,17 @@ const getActivityDisplayValue = (field, value) => {
 // Resolve the person who performed an activity
 
 
+
 const getActivityUserDetails = (activity) => {
-  const user = users.data?.find(item =>
-    String(item.id || item.user_id) === String(activity.user_id)
-  );
+  const activityUserId = activity?.user_id
+    ? String(activity.user_id).toLowerCase()
+    : null;
+
+  const user = activityUserId
+    ? (users.data || []).find(item =>
+        String(item.id || item.user_id || '').toLowerCase() === activityUserId
+      )
+    : null;
 
   const fullName = user
     ? [
@@ -641,18 +648,19 @@ const getActivityUserDetails = (activity) => {
 
   return {
     name:
-      activity.user_name &&
+      activity?.user_name &&
       activity.user_name !== 'Unknown User'
         ? activity.user_name
         : fullName || 'Unknown User',
 
     employeeId:
-      activity.employee_id ||
+      activity?.employee_id ||
       user?.employee_id ||
       user?.employeeId ||
       'Not Available'
   };
 };
+
 
 
 
