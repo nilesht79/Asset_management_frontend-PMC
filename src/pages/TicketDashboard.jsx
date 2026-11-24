@@ -844,146 +844,129 @@ const handleSummaryCardClick = (cardType) => {
         </Row>  */}
 
       
-{/* Stats Cards - Responsive */}
-<Row gutter={[16, 16]}>
-  {/* Total Tickets */}
-  <Col flex="1">
-    <Card
-      hoverable
-      onClick={() => handleSummaryCardClick('total')}
-      style={{
-        cursor: 'pointer',
-        border: activeSummaryCard === 'total'
-          ? '2px solid #262626'
-          : '1px solid #ffffff',
-        backgroundColor: activeSummaryCard === 'total'
-          ? '#f5f5f5'
-          : '#ffffff',
-        transition: 'all 0.2s ease'
-      }}
-    >
-      <Statistic
-        title="Total Tickets"
-        value={stats.total_tickets}
-        prefix={<IssuesCloseOutlined />}
-      />
-    </Card>
-  </Col>
-
-  {/* Open Tickets */}
-  <Col flex="1">
-    <Card
-      hoverable
-      onClick={() => handleSummaryCardClick('open')}
-      style={{
-        cursor: 'pointer',
-        border: activeSummaryCard === 'open'
-          ? '2px solid #1890ff'
-          : '1px solid #ffffff',
-        backgroundColor: activeSummaryCard === 'open'
-          ? '#e6f4ff'
-          : '#ffffff',
-        boxShadow: activeSummaryCard === 'total'
-  ? '0 2px 8px rgba(0, 0, 0, 0.08)'
-  : '0 2px 6px rgba(0, 0, 0, 0.04)',
-        transition: 'all 0.2s ease'
-      }}
-    >
-      <Statistic
-        title="Open Tickets"
-        value={stats.open_tickets}
-        valueStyle={{ color: '#1890ff' }}
-        prefix={<AlertOutlined />}
-      />
-    </Card>
-  </Col>
-
-  {/* Today's Tickets */}
-  <Col flex="1">
-    <Card
-      hoverable
-      onClick={() => handleSummaryCardClick('today')}
-      style={{
-        cursor: 'pointer',
-        border: activeSummaryCard === 'today'
-          ? '2px solid #fa8c16'
-          : '1px solid #ffffff',
-        backgroundColor: activeSummaryCard === 'today'
-          ? '#fff7e6'
-          : '#ffffff',
-        boxShadow: activeSummaryCard === 'total'
-  ? '0 2px 8px rgba(0, 0, 0, 0.08)'
-  : '0 2px 6px rgba(0, 0, 0, 0.04)',
-        transition: 'all 0.2s ease'
-      }}
-    >
-      <Statistic
-        title="Today's Tickets"
-        value={stats.today_tickets}
-        valueStyle={{ color: '#fa8c16' }}
-        prefix={<ClockCircleOutlined />}
-      />
-    </Card>
-  </Col>
-
-  {/* In Progress */}
-  <Col flex="1">
-    <Card
-      hoverable
-      onClick={() => handleSummaryCardClick('in_progress')}
-      style={{
-        cursor: 'pointer',
-        border: activeSummaryCard === 'in_progress'
-          ? '2px solid #722ed1'
-          : '1px solid #ffffff',
-        backgroundColor: activeSummaryCard === 'in_progress'
-          ? '#f9f0ff'
-          : '#ffffff',
-        boxShadow: activeSummaryCard === 'total'
-  ? '0 2px 8px rgba(0, 0, 0, 0.08)'
-  : '0 2px 6px rgba(0, 0, 0, 0.04)',
-        transition: 'all 0.2s ease'
-      }}
-    >
-      <Statistic
-        title="In Progress"
-        value={stats.in_progress_tickets}
-        valueStyle={{ color: '#722ed1' }}
-        prefix={<ClockCircleOutlined />}
-      />
-    </Card>
-  </Col>
-
-  {/* Closed Today */}
-  <Col flex="1">
-    <Card
-      hoverable
-      onClick={() => handleSummaryCardClick('closed_today')}
-      style={{
-        cursor: 'pointer',
-        border: activeSummaryCard === 'closed_today'
-          ? '2px solid #52c41a'
-          : '1px solid #ffffff',
-        backgroundColor: activeSummaryCard === 'closed_today'
-          ? '#f6ffed'
-          : '#ffffff',
-        boxShadow: activeSummaryCard === 'total'
-  ? '0 2px 8px rgba(0, 0, 0, 0.08)'
-  : '0 2px 6px rgba(0, 0, 0, 0.04)',
-        transition: 'all 0.2s ease'
-      }}
-    >
-      <Badge count={stats.overdue_tickets} offset={[10, 0]}>
-        <Statistic
-          title="Closed Today"
-          value={stats.closed_today}
-          valueStyle={{ color: '#52c41a' }}
-          prefix={<CheckCircleOutlined />}
-        />
-      </Badge>
-    </Card>
-  </Col>
-</Row>
+        {/* Stats Cards - Responsive */}
+        <Row gutter={[16, 16]}>
+          {/* Total Tickets */}
+          <Col flex="1">
+            <Card
+              hoverable
+              onClick={() => handleSummaryCardClick('total')}
+              style={{
+                cursor: 'pointer',
+                border: activeSummaryCard === 'total'
+                  ? '2px solid #1677ff'
+                  : '1px solid #1677ff',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 2px 6px rgba(22, 119, 255, 0.08)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Statistic
+                title="Total Tickets"
+                value={stats.total_tickets}
+                prefix={<IssuesCloseOutlined />}
+              />
+            </Card>
+          </Col>
+        
+          {/* Open Tickets */}
+          <Col flex="1">
+            <Card
+              hoverable
+              onClick={() => handleSummaryCardClick('open')}
+              style={{
+                cursor: 'pointer',
+                border: activeSummaryCard === 'open'
+                  ? '2px solid #1890ff'
+                  : '1px solid #1890ff',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 2px 6px rgba(24, 144, 255, 0.08)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Statistic
+                title="Open Tickets"
+                value={stats.open_tickets}
+                valueStyle={{ color: '#1890ff' }}
+                prefix={<AlertOutlined />}
+              />
+            </Card>
+          </Col>
+        
+          {/* Today's Tickets */}
+          <Col flex="1">
+            <Card
+              hoverable
+              onClick={() => handleSummaryCardClick('today')}
+              style={{
+                cursor: 'pointer',
+                border: activeSummaryCard === 'today'
+                  ? '2px solid #fa8c16'
+                  : '1px solid #fa8c16',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 2px 6px rgba(250, 140, 22, 0.08)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Statistic
+                title="Today's Tickets"
+                value={stats.today_tickets}
+                valueStyle={{ color: '#fa8c16' }}
+                prefix={<ClockCircleOutlined />}
+              />
+            </Card>
+          </Col>
+        
+          {/* In Progress */}
+          <Col flex="1">
+            <Card
+              hoverable
+              onClick={() => handleSummaryCardClick('in_progress')}
+              style={{
+                cursor: 'pointer',
+                border: activeSummaryCard === 'in_progress'
+                  ? '2px solid #722ed1'
+                  : '1px solid #722ed1',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 2px 6px rgba(114, 46, 209, 0.08)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Statistic
+                title="In Progress"
+                value={stats.in_progress_tickets}
+                valueStyle={{ color: '#722ed1' }}
+                prefix={<ClockCircleOutlined />}
+              />
+            </Card>
+          </Col>
+        
+          {/* Closed Today */}
+          <Col flex="1">
+            <Card
+              hoverable
+              onClick={() => handleSummaryCardClick('closed_today')}
+              style={{
+                cursor: 'pointer',
+                border: activeSummaryCard === 'closed_today'
+                  ? '2px solid #52c41a'
+                  : '1px solid #52c41a',
+                backgroundColor: '#ffffff',
+                boxShadow: '0 2px 6px rgba(82, 196, 26, 0.08)',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Badge count={stats.overdue_tickets} offset={[10, 0]}>
+                <Statistic
+                  title="Closed Today"
+                  value={stats.closed_today}
+                  valueStyle={{ color: '#52c41a' }}
+                  prefix={<CheckCircleOutlined />}
+                />
+              </Badge>
+            </Card>
+          </Col>
+        </Row>
 
 
       {/* Filters and Actions */}
