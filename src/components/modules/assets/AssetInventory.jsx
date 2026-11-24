@@ -600,12 +600,30 @@ const getActivityDisplayValue = (field, value) => {
     return location?.name || id;
   }
 
-  if (field === 'department_id') {
-    const department = departments.find(
-      item => String(item.department_id) === id
-    );
-    return department?.department_name || id;
-  }
+  // if (field === 'department_id') {
+  //   const department = departments.find(
+  //     item => String(item.department_id) === id
+  //   );
+  //   return department?.department_name || id;
+  // }
+
+  
+if (field === 'department_id') {
+  const department = (departments || []).find(item => {
+    const departmentId = String(
+      item.department_id || item.id || ''
+    ).trim().toLowerCase();
+
+    return departmentId === id.trim().toLowerCase();
+  });
+
+  return (
+    department?.department_name ||
+    department?.name ||
+    id
+  );
+}
+
 
   if (field === 'assigned_to' || field === 'installed_by') {
     const user = users.data?.find(
@@ -3441,7 +3459,9 @@ const getActivityUserDetails = (activity) => {
                               className="grid grid-cols-1 sm:grid-cols-3 gap-2 border-t py-2"
                             >
                               <Text strong>
-                                {field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                                {field === 'department_id'
+  ? 'Department'
+  : field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
                               </Text>
 
                               <div>
