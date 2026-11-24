@@ -855,7 +855,7 @@ const handleSummaryCardClick = (cardType) => {
         cursor: 'pointer',
         border: activeSummaryCard === 'total'
           ? '2px solid #262626'
-          : '1px solid #f0f0f0',
+          : '1px solid #ffffff',
         backgroundColor: activeSummaryCard === 'total'
           ? '#f5f5f5'
           : '#ffffff',
@@ -879,10 +879,13 @@ const handleSummaryCardClick = (cardType) => {
         cursor: 'pointer',
         border: activeSummaryCard === 'open'
           ? '2px solid #1890ff'
-          : '1px solid #f0f0f0',
+          : '1px solid #ffffff',
         backgroundColor: activeSummaryCard === 'open'
           ? '#e6f4ff'
           : '#ffffff',
+        boxShadow: activeSummaryCard === 'total'
+  ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+  : '0 2px 6px rgba(0, 0, 0, 0.04)',
         transition: 'all 0.2s ease'
       }}
     >
@@ -904,10 +907,13 @@ const handleSummaryCardClick = (cardType) => {
         cursor: 'pointer',
         border: activeSummaryCard === 'today'
           ? '2px solid #fa8c16'
-          : '1px solid #f0f0f0',
+          : '1px solid #ffffff',
         backgroundColor: activeSummaryCard === 'today'
           ? '#fff7e6'
           : '#ffffff',
+        boxShadow: activeSummaryCard === 'total'
+  ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+  : '0 2px 6px rgba(0, 0, 0, 0.04)',
         transition: 'all 0.2s ease'
       }}
     >
@@ -929,10 +935,13 @@ const handleSummaryCardClick = (cardType) => {
         cursor: 'pointer',
         border: activeSummaryCard === 'in_progress'
           ? '2px solid #722ed1'
-          : '1px solid #f0f0f0',
+          : '1px solid #ffffff',
         backgroundColor: activeSummaryCard === 'in_progress'
           ? '#f9f0ff'
           : '#ffffff',
+        boxShadow: activeSummaryCard === 'total'
+  ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+  : '0 2px 6px rgba(0, 0, 0, 0.04)',
         transition: 'all 0.2s ease'
       }}
     >
@@ -954,10 +963,13 @@ const handleSummaryCardClick = (cardType) => {
         cursor: 'pointer',
         border: activeSummaryCard === 'closed_today'
           ? '2px solid #52c41a'
-          : '1px solid #f0f0f0',
+          : '1px solid #ffffff',
         backgroundColor: activeSummaryCard === 'closed_today'
           ? '#f6ffed'
           : '#ffffff',
+        boxShadow: activeSummaryCard === 'total'
+  ? '0 2px 8px rgba(0, 0, 0, 0.08)'
+  : '0 2px 6px rgba(0, 0, 0, 0.04)',
         transition: 'all 0.2s ease'
       }}
     >
