@@ -530,7 +530,7 @@ const AssetInventory = () => {
   //   setViewingAsset(asset)
   //   setViewDetailsModalVisible(true)
   // }
-  const showViewDetailsModal = async (asset) => {
+ const showViewDetailsModal = async (asset) => {
   setViewingAsset(asset)
   setViewDetailsModalVisible(true)
   setActivityLoading(true)
@@ -538,7 +538,15 @@ const AssetInventory = () => {
   try {
     const response = await assetService.getAsset(asset.id)
 
-    const fullAsset = response?.data?.data || response?.data || {}
+    const fullAsset =
+      response?.data?.data?.asset ||
+      response?.data?.data ||
+      response?.data?.asset ||
+      response?.data
+
+    if (!fullAsset || !fullAsset.id) {
+      throw new Error('Invalid asset details response')
+    }
 
     setViewingAsset({
       ...asset,
