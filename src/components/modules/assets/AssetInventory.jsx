@@ -577,6 +577,78 @@ const AssetInventory = () => {
   }
 }
 
+  
+// Resolve UUID values in Activity History to readable names
+const getActivityDisplayValue = (field, value) => {
+  if (value === null || value === undefined || value === '') {
+    return 'N/A';
+  }
+
+  const id = String(value);
+
+  if (field === 'product_id') {
+    const product = products.data?.find(
+      item => String(item.id) === id
+    );
+    return product?.name || id;
+  }
+
+  if (field === 'location_id') {
+    const location = locations.find(
+      item => String(item.id) === id
+    );
+    return location?.name || id;
+  }
+
+  if (field === 'department_id') {
+    const department = departments.find(
+      item => String(item.department_id) === id
+    );
+    return department?.department_name || id;
+  }
+
+  if (field === 'assigned_to' || field === 'installed_by') {
+    const user = users.data?.find(
+      item =>
+        String(item.id || item.user_id) === id
+    );
+
+    if (user) {
+      return [
+        user.firstName || user.first_name,
+        user.lastName || user.last_name
+      ].filter(Boolean).join(' ') || user.email || id;
+    }
+  }
+
+  return id;
+};
+
+// Resolve the person who performed an activity
+const getActivityUserName = (activity) => {
+  if (
+    activity.user_name &&
+    activity.user_name !== 'Unknown User'
+  ) {
+    return activity.user_name;
+  }
+
+  const user = users.data?.find(
+    item =>
+      String(item.id || item.user_id) === String(activity.user_id)
+  );
+
+  if (user) {
+    return [
+      user.firstName || user.first_name,
+      user.lastName || user.last_name
+    ].filter(Boolean).join(' ') || user.email || 'Unknown User';
+  }
+
+  return activity.user_id || 'Unknown User';
+};
+
+
   const showAssignModal = (asset) => {
     setAssigningAsset(asset)
     setAssignModalVisible(true)
@@ -3304,7 +3376,8 @@ const AssetInventory = () => {
 
                     <div className="mt-2 space-y-1">
                       <Text type="secondary">
-                        **Performed By:** {activity.user_name || activity.user_id || 'Unknown User'}
+                        {/* **Performed By:** {activity.user_name || activity.user_id || 'Unknown User'} */}
+                        **Performed By:** {getActivityUserName(activity)}
                       </Text>
                     
                       <div>
@@ -3331,7 +3404,7 @@ const AssetInventory = () => {
                                   Previous
                                 </Text>
                                 <div className="break-words">
-                                  {values?.old ?? 'N/A'}
+                                  {getActivityDisplayValue(field, values?.old)}
                                 </div>
                               </div>
 
@@ -3340,7 +3413,7 @@ const AssetInventory = () => {
                                   Updated
                                 </Text>
                                 <div className="break-words">
-                                  {values?.new ?? 'N/A'}
+                                  {getActivityDisplayValue(field, values?.new)}
                                 </div>
                               </div>
                             </div>
