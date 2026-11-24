@@ -665,6 +665,7 @@ const getActivityUserDetails = (activity) => {
 
 
 
+
   const showAssignModal = (asset) => {
     setAssigningAsset(asset)
     setAssignModalVisible(true)
