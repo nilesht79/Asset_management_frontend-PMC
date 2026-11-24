@@ -307,10 +307,46 @@ const userService = {
 //     .sort((a, b) => b.level - a.level)
 // },
 
-  getAvailableRoles: (currentUserRole) => {
+//   getAvailableRoles: (currentUserRole) => {
+//   const hierarchy = userService.getRoleHierarchy()
+
+//   // Coordinator can filter all manageable roles
+//   if (currentUserRole === 'coordinator') {
+//     const coordinatorRoles = [
+//       'it_head',
+//       'department_head',
+//       'department_coordinator',
+//       'engineer',
+//       'employee'
+//     ]
+
+//     return coordinatorRoles.map(role => ({
+//       value: role,
+//       label: userService.getRoleDisplayName(role),
+//       level: hierarchy[role] || 0
+//     }))
+//   }
+
+//   // Existing hierarchy logic for other roles
+//   const currentLevel = hierarchy[currentUserRole] || 0
+
+//   return Object.entries(hierarchy)
+//     .filter(([role, level]) =>
+//       level < currentLevel && role !== 'coordinator'
+//     )
+//     .map(([role]) => ({
+//       value: role,
+//       label: userService.getRoleDisplayName(role),
+//       level: hierarchy[role]
+//     }))
+//     .sort((a, b) => b.level - a.level)
+// },
+
+  
+getAvailableRoles: (currentUserRole) => {
   const hierarchy = userService.getRoleHierarchy()
 
-  // Coordinator can filter all manageable roles
+  // Coordinator can filter only manageable roles
   if (currentUserRole === 'coordinator') {
     const coordinatorRoles = [
       'it_head',
@@ -327,21 +363,20 @@ const userService = {
     }))
   }
 
-  // Existing hierarchy logic for other roles
+  // SuperAdmin and Admin can also see Coordinator
   const currentLevel = hierarchy[currentUserRole] || 0
 
   return Object.entries(hierarchy)
-    .filter(([role, level]) =>
-      level < currentLevel && role !== 'coordinator'
-    )
-    .map(([role]) => ({
+    .filter(([, level]) => level < currentLevel)
+    .map(([role, level]) => ({
       value: role,
       label: userService.getRoleDisplayName(role),
-      level: hierarchy[role]
+      level
     }))
     .sort((a, b) => b.level - a.level)
 },
 
+  
   // Search and filter utilities
   buildSearchParams: (filters, pagination = {}) => {
     const params = {}
