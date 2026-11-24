@@ -92,10 +92,28 @@ const Login = () => {
             />
           )} */}
 
+          
+          {showError && error && (
+            <Alert
+              message="Login Failed"
+              description={error}
+              type="error"
+              showIcon
+              closable
+              onClose={handleErrorClose}
+              className="mb-4"
+            />
+          )}
+
+
           <Form
             form={form}
             name="login"
             onFinish={handleSubmit}
+            onValuesChange={() => {
+                setShowError(false);
+                dispatch(clearError());
+              }}
             layout="vertical"
             size="large"
             requiredMark={false}
@@ -104,11 +122,12 @@ const Login = () => {
               name="employeeId"
               label="Employee ID"
               rules={[
-                {
-                  required: true,
-                  message: 'Please enter your Employee ID',
-                },
-              ]}
+                  {
+                    required: true,
+                    whitespace: true,
+                    message: 'Please enter your Employee ID',
+                  },
+                ]}
             >
               <Input
                 prefix={<UserOutlined className="text-gray-400" />}
@@ -123,6 +142,7 @@ const Login = () => {
               rules={[
                 {
                   required: true,
+                  whitespace: true,
                   message: 'Please enter your password',
                 },
               ]}
