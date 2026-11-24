@@ -625,28 +625,35 @@ const getActivityDisplayValue = (field, value) => {
 };
 
 // Resolve the person who performed an activity
-const getActivityUserName = (activity) => {
-  if (
-    activity.user_name &&
-    activity.user_name !== 'Unknown User'
-  ) {
-    return activity.user_name;
-  }
 
-  const user = users.data?.find(
-    item =>
-      String(item.id || item.user_id) === String(activity.user_id)
+const getActivityUserDetails = (activity) => {
+  // Match the activity's user ID against the loaded user master
+  const user = users.data?.find(item =>
+    String(item.id || item.user_id) === String(activity.user_id)
   );
 
-  if (user) {
-    return [
-      user.firstName || user.first_name,
-      user.lastName || user.last_name
-    ].filter(Boolean).join(' ') || user.email || 'Unknown User';
-  }
+  const fullName = user
+    ? [
+        user.firstName || user.first_name,
+        user.lastName || user.last_name
+      ].filter(Boolean).join(' ')
+    : null;
 
-  return activity.user_id || 'Unknown User';
+  return {
+    name:
+      fullName ||
+      (activity.user_name && activity.user_name !== 'Unknown User'
+        ? activity.user_name
+        : 'Unknown User'),
+
+    employeeId:
+      user?.employeeId ||
+      user?.employee_id ||
+      activity.employee_id ||
+      null
+  };
 };
+
 
 
   const showAssignModal = (asset) => {
@@ -3373,10 +3380,9 @@ const getActivityUserName = (activity) => {
                         User ID: {activity.user_id || 'N/A'}
                       </Text>
                     </div> */}
-
+{/* 
                     <div className="mt-2 space-y-1">
                       <Text type="secondary">
-                        {/* **Performed By:** {activity.user_name || activity.user_id || 'Unknown User'} */}
                         **Performed By:** {getActivityUserName(activity)}
                       </Text>
                     
@@ -3385,7 +3391,36 @@ const getActivityUserName = (activity) => {
                           **Role:** {activity.user_role || 'Unknown'}
                         </Text>
                       </div>
-                    </div>
+                    </div> */}
+
+                      
+<div className="mt-2 space-y-1">
+  {(() => {
+    const userDetails = getActivityUserDetails(activity);
+
+    return (
+      <>
+        <Text type="secondary">
+          <strong>Performed By:</strong> {userDetails.name}
+        </Text>
+
+        <div>
+          <Text type="secondary">
+            <strong>Employee ID:</strong>{' '}
+            {userDetails.employeeId || 'Not Available'}
+          </Text>
+        </div>
+
+        <div>
+          <Text type="secondary">
+            <strong>Role:</strong> {activity.user_role || 'Unknown'}
+          </Text>
+        </div>
+      </>
+    );
+  })()}
+</div>
+
 
                     {activity.changes && (
                       <div className="mt-3">
