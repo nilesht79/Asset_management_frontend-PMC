@@ -94,6 +94,7 @@ const TicketDashboard = () => {
     assigned_to_engineer_id: '',
     is_guest: undefined
   });
+  const [activeSummaryCard, setActiveSummaryCard] = useState(null);
 
   // Modal and Drawer states
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -288,6 +289,7 @@ const TicketDashboard = () => {
 
   // Ticket Management Status and Priority Filter
   const handleTableChange = (paginationInfo, tableFilters, sorter) => {
+    setActiveSummaryCard(null);
   setPagination((prev) => ({
     ...prev,
     current: paginationInfo.current,
@@ -312,13 +314,77 @@ const TicketDashboard = () => {
     }));
   };
 
-  const handleApplyFilters = (newFilters) => {
-    setFilters(newFilters);
-    setPagination((prev) => ({
-      ...prev,
-      current: 1
-    }));
+  
+const handleSummaryCardClick = (cardType) => {
+  const isAlreadyActive = activeSummaryCard === cardType;
+  const today = dayjs().format('YYYY-MM-DD');
+
+  const cardFilters = {
+    total: {},
+    open: {
+      status: 'open'
+    },
+    today: {
+      start_date: today,
+      end_date: today
+    },
+    in_progress: {
+      status: 'in_progress'
+    },
+    closed_today: {
+      status: 'closed',
+      start_date: today,
+      end_date: today
+    }
   };
+
+  setActiveSummaryCard(isAlreadyActive ? null : cardType);
+
+  setFilters((prev) => {
+    // Remove the previous summary-card status/date filters
+    const nextFilters = {
+      ...prev,
+      status: '',
+      start_date: '',
+      end_date: ''
+    };
+
+    // Clicking the active card again clears its selection
+    if (isAlreadyActive) {
+      return nextFilters;
+    }
+
+    return {
+      ...nextFilters,
+      ...cardFilters[cardType]
+    };
+  });
+
+  setPagination((prev) => ({
+    ...prev,
+    current: 1
+  }));
+};
+
+
+  // const handleApplyFilters = (newFilters) => {
+  //   setFilters(newFilters);
+  //   setPagination((prev) => ({
+  //     ...prev,
+  //     current: 1
+  //   }));
+  // };
+
+  const handleApplyFilters = (newFilters) => {
+  setActiveSummaryCard(null);
+
+  setFilters(newFilters);
+
+  setPagination((prev) => ({
+    ...prev,
+    current: 1
+  }));
+};
 
   // Clear all filters and reset form fields OLD CODE
   // const handleClearFilters = () => {
@@ -358,6 +424,8 @@ const TicketDashboard = () => {
 
         // Clear filter state
         setFilters(clearedFilters);
+
+      setActiveSummaryCard(null);
 
         // Reset pagination
         setPagination((prev) => ({
@@ -739,24 +807,26 @@ const TicketDashboard = () => {
       </div>
 
       {/* Stats Cards - Responsive */}
-      <Row gutter={[16, 16]}>
+       {/* <Row gutter={[16, 16]}>
           <Col flex="1">
             <Card>
               <Statistic title="Total Tickets" value={stats.total_tickets} prefix={<IssuesCloseOutlined />} />
             </Card>
           </Col>
         
-          <Col flex="1">
+           <Col flex="1">
             <Card>
               <Statistic title="Open Tickets" value={stats.open_tickets} valueStyle={{ color: '#1890ff' }} prefix={<AlertOutlined />} />
             </Card>
           </Col>
         
-          <Col flex="1">
+        
+           <Col flex="1">
             <Card>
               <Statistic title="Today's Tickets" value={stats.today_tickets} valueStyle={{ color: '#fa8c16' }} prefix={<ClockCircleOutlined />} />
             </Card>
-          </Col>
+          </Col> 
+
         
           <Col flex="1">
             <Card>
@@ -771,7 +841,138 @@ const TicketDashboard = () => {
               </Badge>
             </Card>
           </Col>
-        </Row>
+        </Row>  */}
+
+      
+{/* Stats Cards - Responsive */}
+<Row gutter={[16, 16]}>
+  {/* Total Tickets */}
+  <Col flex="1">
+    <Card
+      hoverable
+      onClick={() => handleSummaryCardClick('total')}
+      style={{
+        cursor: 'pointer',
+        border: activeSummaryCard === 'total'
+          ? '2px solid #262626'
+          : '1px solid #f0f0f0',
+        backgroundColor: activeSummaryCard === 'total'
+          ? '#f5f5f5'
+          : '#ffffff',
+        transition: 'all 0.2s ease'
+      }}
+    >
+      <Statistic
+        title="Total Tickets"
+        value={stats.total_tickets}
+        prefix={<IssuesCloseOutlined />}
+      />
+    </Card>
+  </Col>
+
+  {/* Open Tickets */}
+  <Col flex="1">
+    <Card
+      hoverable
+      onClick={() => handleSummaryCardClick('open')}
+      style={{
+        cursor: 'pointer',
+        border: activeSummaryCard === 'open'
+          ? '2px solid #1890ff'
+          : '1px solid #f0f0f0',
+        backgroundColor: activeSummaryCard === 'open'
+          ? '#e6f4ff'
+          : '#ffffff',
+        transition: 'all 0.2s ease'
+      }}
+    >
+      <Statistic
+        title="Open Tickets"
+        value={stats.open_tickets}
+        valueStyle={{ color: '#1890ff' }}
+        prefix={<AlertOutlined />}
+      />
+    </Card>
+  </Col>
+
+  {/* Today's Tickets */}
+  <Col flex="1">
+    <Card
+      hoverable
+      onClick={() => handleSummaryCardClick('today')}
+      style={{
+        cursor: 'pointer',
+        border: activeSummaryCard === 'today'
+          ? '2px solid #fa8c16'
+          : '1px solid #f0f0f0',
+        backgroundColor: activeSummaryCard === 'today'
+          ? '#fff7e6'
+          : '#ffffff',
+        transition: 'all 0.2s ease'
+      }}
+    >
+      <Statistic
+        title="Today's Tickets"
+        value={stats.today_tickets}
+        valueStyle={{ color: '#fa8c16' }}
+        prefix={<ClockCircleOutlined />}
+      />
+    </Card>
+  </Col>
+
+  {/* In Progress */}
+  <Col flex="1">
+    <Card
+      hoverable
+      onClick={() => handleSummaryCardClick('in_progress')}
+      style={{
+        cursor: 'pointer',
+        border: activeSummaryCard === 'in_progress'
+          ? '2px solid #722ed1'
+          : '1px solid #f0f0f0',
+        backgroundColor: activeSummaryCard === 'in_progress'
+          ? '#f9f0ff'
+          : '#ffffff',
+        transition: 'all 0.2s ease'
+      }}
+    >
+      <Statistic
+        title="In Progress"
+        value={stats.in_progress_tickets}
+        valueStyle={{ color: '#722ed1' }}
+        prefix={<ClockCircleOutlined />}
+      />
+    </Card>
+  </Col>
+
+  {/* Closed Today */}
+  <Col flex="1">
+    <Card
+      hoverable
+      onClick={() => handleSummaryCardClick('closed_today')}
+      style={{
+        cursor: 'pointer',
+        border: activeSummaryCard === 'closed_today'
+          ? '2px solid #52c41a'
+          : '1px solid #f0f0f0',
+        backgroundColor: activeSummaryCard === 'closed_today'
+          ? '#f6ffed'
+          : '#ffffff',
+        transition: 'all 0.2s ease'
+      }}
+    >
+      <Badge count={stats.overdue_tickets} offset={[10, 0]}>
+        <Statistic
+          title="Closed Today"
+          value={stats.closed_today}
+          valueStyle={{ color: '#52c41a' }}
+          prefix={<CheckCircleOutlined />}
+        />
+      </Badge>
+    </Card>
+  </Col>
+</Row>
+
 
       {/* Filters and Actions */}
       <Card>
