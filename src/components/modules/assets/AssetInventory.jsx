@@ -130,8 +130,11 @@ const AssetInventory = () => {
   const [assignModalVisible, setAssignModalVisible] = useState(false)
   const [assigningAsset, setAssigningAsset] = useState(null)
   const [assignForm] = Form.useForm()
+  // const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState(false)
+  // const [viewingAsset, setViewingAsset] = useState(null)
   const [viewDetailsModalVisible, setViewDetailsModalVisible] = useState(false)
   const [viewingAsset, setViewingAsset] = useState(null)
+  const [activityLoading, setActivityLoading] = useState(false)
   const [bulkAddModalVisible, setBulkAddModalVisible] = useState(false)
   const [legacyImportModalVisible, setLegacyImportModalVisible] = useState(false)
   const [filterDrawerVisible, setFilterDrawerVisible] = useState(false)
@@ -523,10 +526,48 @@ const AssetInventory = () => {
     })
   }
 
-  const showViewDetailsModal = (asset) => {
-    setViewingAsset(asset)
-    setViewDetailsModalVisible(true)
+  // const showViewDetailsModal = (asset) => {
+  //   setViewingAsset(asset)
+  //   setViewDetailsModalVisible(true)
+  // }
+  const showViewDetailsModal = async (asset) => {
+  setViewingAsset(asset)
+  setViewDetailsModalVisible(true)
+  setActivityLoading(true)
+
+  try {
+    const response = await assetService.getAsset(asset.id)
+
+    const fullAsset = response?.data?.data || response?.data || {}
+
+    setViewingAsset({
+      ...asset,
+      ...fullAsset
+    })
+  } catch (error) {
+    console.error('Failed to load asset details:', error)
+    message.error('Failed to load complete asset details')
+  } finally {
+    setActivityLoading(false)
   }
+}
+
+  const getAssetActivityHistory = (asset) => {
+  if (!asset?.activity_history) {
+    return []
+  }
+
+  try {
+    const history = typeof asset.activity_history === 'string'
+      ? JSON.parse(asset.activity_history)
+      : asset.activity_history
+
+    return Array.isArray(history) ? history : []
+  } catch (error) {
+    console.error('Invalid asset activity history:', error)
+    return []
+  }
+}
 
   const showAssignModal = (asset) => {
     setAssigningAsset(asset)
@@ -3190,6 +3231,113 @@ const AssetInventory = () => {
                 )
               },
               {
+  key: 'activity-history',
+  label: (
+    <span>
+      <HistoryOutlined />
+      Activity History
+    </span>
+  ),
+  children: (
+    <div className="p-2">
+      {activityLoading ? (
+        <div className="text-center p-6">
+          Loading activity history...
+        </div>
+      ) : (
+        (() => {
+          const activities = getAssetActivityHistory(viewingAsset)
+
+          if (activities.length === 0) {
+            return (
+              <Alert
+                message="No Activity History"
+                description="No activity has been recorded for this asset yet."
+                type="info"
+                showIcon
+              />
+            )
+          }
+
+          return (
+            <div className="space-y-3">
+              {activities
+                .slice()
+                .reverse()
+                .map((activity, index) => (
+                  <div
+                    key={`${activity.date || index}-${index}`}
+                    className="border rounded-lg p-3"
+                  >
+                    <div className="flex flex-wrap justify-between gap-2">
+                      <Space>
+                        <HistoryOutlined />
+                        <Text strong>
+                          {activity.action === 'ASSET_CREATED'
+                            ? 'Asset Created'
+                            : activity.action === 'ASSET_UPDATED'
+                              ? 'Asset Updated'
+                              : activity.action || 'Asset Activity'}
+                        </Text>
+                      </Space>
+
+                      <Text type="secondary" className="text-xs">
+                        {activity.date
+                          ? dayjs(activity.date).format('DD-MMM-YYYY hh:mm A')
+                          : 'Date unavailable'}
+                      </Text>
+                    </div>
+
+                    <div className="mt-2">
+                      <Text type="secondary">
+                        User ID: {activity.user_id || 'N/A'}
+                      </Text>
+                    </div>
+
+                    {activity.changes && (
+                      <div className="mt-3">
+                        {Object.entries(activity.changes).map(
+                          ([field, values]) => (
+                            <div
+                              key={field}
+                              className="grid grid-cols-1 sm:grid-cols-3 gap-2 border-t py-2"
+                            >
+                              <Text strong>
+                                {field.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                              </Text>
+
+                              <div>
+                                <Text type="secondary" className="text-xs">
+                                  Previous
+                                </Text>
+                                <div className="break-words">
+                                  {values?.old ?? 'N/A'}
+                                </div>
+                              </div>
+
+                              <div>
+                                <Text type="secondary" className="text-xs">
+                                  Updated
+                                </Text>
+                                <div className="break-words">
+                                  {values?.new ?? 'N/A'}
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+            </div>
+          )
+        })()
+      )}
+    </div>
+  )
+},
+              {
                 key: 'repair-history',
                 label: (
                   <span>
@@ -3204,7 +3352,8 @@ const AssetInventory = () => {
                     viewMode="table"
                   />
                 )
-              }
+              },
+              
             ]}
           />
         )}
