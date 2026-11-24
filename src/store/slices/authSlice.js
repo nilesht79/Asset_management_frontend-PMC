@@ -126,12 +126,21 @@ export const checkAuth = createAsyncThunk(
       }
     } catch (error) {
       // If profile fails, user is not authenticated - this is normal, not an error
+      // if (error.response?.status === 401) {
+      //   console.log('ℹ️ User not authenticated (expected behavior)')
+      //   return rejectWithValue({
+      //     message: 'Not authenticated'
+      //   })
+      // }
+
       if (error.response?.status === 401) {
-        console.log('ℹ️ User not authenticated (expected behavior)')
-        return rejectWithValue({
-          message: 'Not authenticated'
-        })
-      }
+  console.log('ℹ️ User not authenticated (expected behavior)')
+
+  return rejectWithValue({
+    message: 'Not authenticated',
+    status: 401
+  })
+}
 
       // Only log actual errors (not 401)
       console.log('❌ Auth check failed:', error.response?.status, error.response?.data?.message)
@@ -295,14 +304,40 @@ const authSlice = createSlice({
 
         console.log('🎉 Auth check fulfilled - user authenticated')
       })
-      .addCase(checkAuth.rejected, (state, action) => {
-        state.isLoading = false
-        state.user = null
-        state.tokens = null
-        state.isAuthenticated = false
-        state.error = action.payload?.message || 'Authentication failed'
-        console.log('❌ Auth check rejected - user not authenticated')
-      })
+      // .addCase(checkAuth.rejected, (state, action) => {
+      //   state.isLoading = false
+      //   state.user = null
+      //   state.tokens = null
+      //   state.isAuthenticated = false
+      //   state.error = action.payload?.message || 'Authentication failed'
+      //   console.log('❌ Auth check rejected - user not authenticated')
+      // })
+
+      
+.addCase(checkAuth.rejected, (state, action) => {
+  state.isLoading = false
+  state.user = null
+  state.tokens = null
+  state.isAuthenticated = false
+
+  // A 401 during initial authentication is normal.
+  // Do not display it as a login failure.
+  if (action.payload?.status === 401) {
+    state.error = null
+    state.lastLoginError = null
+
+    console.log('ℹ️ No active session. Login required.')
+  } else {
+    state.error =
+      action.payload?.message || 'Authentication failed'
+
+    console.error(
+      '❌ Authentication check failed:',
+      state.error
+    )
+  }
+})
+
       
       // Update Profile
       .addCase(updateProfile.fulfilled, (state, action) => {
