@@ -398,8 +398,20 @@ const AssetInventory = () => {
       // Format dates to YYYY-MM-DD for API
       const formattedValues = { ...values }
 
-            formattedValues.location_id = values.location_id || null
-      formattedValues.department_id = values.department_id || null
+      //       formattedValues.location_id = values.location_id || null
+      // formattedValues.department_id = values.department_id || null
+
+      formattedValues.location_id =
+  values.location_id?.id || values.location_id || null
+
+const departmentValue = values.department_id
+
+formattedValues.department_id =
+  departmentValue && typeof departmentValue === 'object'
+    ? departmentValue.id || null
+    : departmentValue || null
+
+      
 
        console.log('UPDATE PAYLOAD:', formattedValues)
 
@@ -426,19 +438,43 @@ const AssetInventory = () => {
 
 
       // Ensure UUID fields are strings (not arrays) - fix for form caching issues
-      const uuidFields = ['vendor_id', 'product_id', 'assigned_to', 'parent_asset_id']
-      uuidFields.forEach(field => {
-        if (formattedValues[field]) {
-          // If it's an array, take the first value
-          if (Array.isArray(formattedValues[field])) {
-            formattedValues[field] = formattedValues[field][0] || null
+      // const uuidFields = ['vendor_id', 'product_id', 'assigned_to', 'parent_asset_id']
+      // uuidFields.forEach(field => {
+      //   if (formattedValues[field]) {
+      //     // If it's an array, take the first value
+      //     if (Array.isArray(formattedValues[field])) {
+      //       formattedValues[field] = formattedValues[field][0] || null
+      //     }
+      //     // Ensure it's a string
+      //     if (formattedValues[field] && typeof formattedValues[field] !== 'string') {
+      //       formattedValues[field] = String(formattedValues[field])
+      //     }
+      //   }
+      // })
+
+      // Normalize UUID fields before sending API request
+        const uuidFields = [
+          'vendor_id',
+          'product_id',
+          'assigned_to',
+          'parent_asset_id',
+          'department_id',
+          'location_id'
+        ]
+        
+        uuidFields.forEach(field => {
+          const value = formattedValues[field]
+        
+          if (Array.isArray(value)) {
+            formattedValues[field] = value[0] || null
+          } else if (value && typeof value === 'object') {
+            formattedValues[field] = value.id || null
+          } else if (value) {
+            formattedValues[field] = String(value)
+          } else {
+            formattedValues[field] = null
           }
-          // Ensure it's a string
-          if (formattedValues[field] && typeof formattedValues[field] !== 'string') {
-            formattedValues[field] = String(formattedValues[field])
-          }
-        }
-      })
+        })
 
       // Format warranty and lifecycle dates
       if (formattedValues.warranty_start_date) {
@@ -2511,13 +2547,27 @@ const getActivityUserDetails = (activity) => {
 
                         console.log('Selected User:', selectedUser)
 
+                        // if (selectedUser) {
+                        //   form.setFieldsValue({
+                        //     location_id: selectedUser.location_id,
+                        //     department_id:
+                        //       selectedUser.department_id ||
+                        //       selectedUser.department?.id ||
+                        //       selectedUser.department
+                        //   })
+                        // }
+
                         if (selectedUser) {
+                          const departmentId =
+                            selectedUser.department_id ||
+                            selectedUser.department?.id ||
+                            (typeof selectedUser.department === 'string'
+                              ? selectedUser.department
+                              : null)
+                        
                           form.setFieldsValue({
-                            location_id: selectedUser.location_id,
-                            department_id:
-                              selectedUser.department_id ||
-                              selectedUser.department?.id ||
-                              selectedUser.department
+                            location_id: selectedUser.location_id || null,
+                            department_id: departmentId || undefined
                           })
                         }
                       }}
