@@ -3796,7 +3796,6 @@ const getActivityUserDetails = (activity) => {
           dispatch(fetchAssetStatistics())
         }}
         products={products.data || []}
-        {/* locations={locations.data || []} */}
         locations={locations}
         oems={oems.data || []}
         categories={categories.data || []}
