@@ -676,6 +676,22 @@ formattedValues.department_id =
   
 // Resolve UUID values in Activity History to readable names
 const getActivityDisplayValue = (field, value) => {
+  // Display assigned user's name and employee ID
+  if (field === 'assigned_to') {
+    if (!value) {
+      return 'Available';
+    }
+
+    if (typeof value === 'object') {
+      const name = value.name || 'Unknown User';
+      const employeeId = value.employee_id;
+
+      return employeeId
+        ? `${name} (${employeeId})`
+        : name;
+    }
+  }
+  
   if (value === null || value === undefined || value === '') {
     return 'N/A';
   }
