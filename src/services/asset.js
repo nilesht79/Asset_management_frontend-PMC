@@ -28,6 +28,15 @@ const assetService = {
     return api.get(`/assets/${id}`)
   },
 
+  // Get movement history for a specific asset
+getAssetMovementHistory: (assetId, params = {}) => {
+  const queryString = apiUtils.buildQueryString(params);
+
+  return api.get(
+    `/assets/${assetId}/movements${queryString ? `?${queryString}` : ''}`
+  );
+},
+
   // Create new asset
   createAsset: (data) => {
     return api.post('/assets', data)
