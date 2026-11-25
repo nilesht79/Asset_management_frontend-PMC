@@ -530,35 +530,95 @@ const AssetInventory = () => {
   //   setViewingAsset(asset)
   //   setViewDetailsModalVisible(true)
   // }
- const showViewDetailsModal = async (asset) => {
-  setViewingAsset(asset)
-  setViewDetailsModalVisible(true)
-  setActivityLoading(true)
+//  const showViewDetailsModal = async (asset) => {
+//   setViewingAsset(asset)
+//   setViewDetailsModalVisible(true)
+//   setActivityLoading(true)
+
+//   try {
+//     const response = await assetService.getAsset(asset.id)
+
+//     const fullAsset =
+//       response?.data?.data?.asset ||
+//       response?.data?.data ||
+//       response?.data?.asset ||
+//       response?.data
+
+//     if (!fullAsset || !fullAsset.id) {
+//       throw new Error('Invalid asset details response')
+//     }
+
+//     setViewingAsset({
+//       ...asset,
+//       ...fullAsset
+//     })
+//   } catch (error) {
+//     console.error('Failed to load asset details:', error)
+//     message.error('Failed to load complete asset details')
+//   } finally {
+//     setActivityLoading(false)
+//   }
+// }
+
+  const showViewDetailsModal = async (asset) => {
+  setViewingAsset({
+    ...asset,
+    movement_history: []
+  });
+
+  setViewDetailsModalVisible(true);
+  setActivityLoading(true);
 
   try {
-    const response = await assetService.getAsset(asset.id)
+    // 1. Fetch complete asset details
+    const response = await assetService.getAsset(asset.id);
 
     const fullAsset =
       response?.data?.data?.asset ||
       response?.data?.data ||
       response?.data?.asset ||
-      response?.data
+      response?.data;
 
     if (!fullAsset || !fullAsset.id) {
-      throw new Error('Invalid asset details response')
+      throw new Error('Invalid asset details response');
     }
 
+    // 2. Fetch asset movement history
+    let movementHistory = [];
+
+    try {
+      const movementResponse =
+        await assetService.getAssetMovementHistory(asset.id);
+
+      movementHistory =
+        movementResponse?.data?.data || [];
+
+      if (!Array.isArray(movementHistory)) {
+        movementHistory = [];
+      }
+    } catch (movementError) {
+      console.error(
+        'Failed to load asset movement history:',
+        movementError
+      );
+
+      message.warning('Could not load asset movement history');
+    }
+
+    // 3. Update asset details and movement history
     setViewingAsset({
       ...asset,
-      ...fullAsset
-    })
+      ...fullAsset,
+      movement_history: movementHistory
+    });
+
   } catch (error) {
-    console.error('Failed to load asset details:', error)
-    message.error('Failed to load complete asset details')
+    console.error('Failed to load asset details:', error);
+    message.error('Failed to load complete asset details');
   } finally {
-    setActivityLoading(false)
+    setActivityLoading(false);
   }
-}
+};
 
   const getAssetActivityHistory = (asset) => {
   if (!asset?.activity_history) {
@@ -3361,9 +3421,13 @@ const getActivityUserDetails = (activity) => {
         </div>
       ) : (
         (() => {
-          const activities = getAssetActivityHistory(viewingAsset)
+          // const activities = getAssetActivityHistory(viewingAsset)
+          const activities = getAssetActivityHistory(viewingAsset);
 
-          if (activities.length === 0) {
+          const movements = viewingAsset?.movement_history || [];
+
+          // if (activities.length === 0) {
+          if (activities.length === 0 && movements.length === 0) {
             return (
               <Alert
                 message="No Activity History"
@@ -3488,6 +3552,102 @@ const getActivityUserDetails = (activity) => {
                     )}
                   </div>
                 ))}
+                 
+
+              {/* Asset Movement History */}
+              {movements.length > 0 && (
+                <>
+                  <Divider orientation="left">
+                    Asset Movement History
+                  </Divider>
+
+                  {movements.map((movement, index) => (
+                    <div
+                      key={movement.id || index}
+                      className="border rounded-lg p-3"
+                    >
+                      <div className="flex flex-wrap justify-between gap-2">
+                        <Space>
+                          <HistoryOutlined />
+
+                          <Text strong>
+                            {movement.movement_type
+                              ?.replace(/_/g, ' ')
+                              .toUpperCase() || 'ASSET MOVEMENT'}
+                          </Text>
+
+                          <Tag color="blue">
+                            {movement.status?.toUpperCase() || 'N/A'}
+                          </Tag>
+                        </Space>
+
+                        <Text type="secondary" className="text-xs">
+                          {movement.movement_date
+                            ? dayjs(movement.movement_date).format(
+                                'DD-MMM-YYYY hh:mm A'
+                              )
+                            : 'Date unavailable'}
+                        </Text>
+                      </div>
+
+                      <div className="mt-3 space-y-2">
+                        <div>
+                          <Text type="secondary">
+                            <strong>Previous User:</strong>
+                          </Text>
+                          <div>{movement.previous_user_name || 'N/A'}</div>
+                        </div>
+
+                        <div>
+                          <Text type="secondary">
+                            <strong>Current Assigned User:</strong>
+                          </Text>
+                          <div>{movement.assigned_to_name || 'Unassigned'}</div>
+                        </div>
+
+                        <div>
+                          <Text type="secondary">
+                            <strong>Previous Location:</strong>
+                          </Text>
+                          <div>{movement.previous_location_name || 'N/A'}</div>
+                        </div>
+
+                        <div>
+                          <Text type="secondary">
+                            <strong>Current Location:</strong>
+                          </Text>
+                          <div>{movement.location_name || 'N/A'}</div>
+                        </div>
+
+                        <div>
+                          <Text type="secondary">
+                            <strong>Performed By:</strong>
+                          </Text>
+                          <div>{movement.performed_by_name || 'N/A'}</div>
+                        </div>
+
+                        {movement.reason && (
+                          <div>
+                            <Text type="secondary">
+                              <strong>Reason:</strong>
+                            </Text>
+                            <div>{movement.reason}</div>
+                          </div>
+                        )}
+
+                        {movement.notes && (
+                          <div>
+                            <Text type="secondary">
+                              <strong>Notes:</strong>
+                            </Text>
+                            <div>{movement.notes}</div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </>
+              )}
             </div>
           )
         })()
@@ -3636,7 +3796,8 @@ const getActivityUserDetails = (activity) => {
           dispatch(fetchAssetStatistics())
         }}
         products={products.data || []}
-        locations={locations.data || []}
+        {/* locations={locations.data || []} */}
+        locations={locations}
         oems={oems.data || []}
         categories={categories.data || []}
       />
